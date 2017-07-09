@@ -85,12 +85,14 @@ void USART2_PrintBlock(uint8_t* pdata, uint8_t len)
     USART_ITConfig(USART2, USART_IT_TXE, ENABLE);
 }
 
+/*
 int fputc(int ch, FILE *f)
 {
     while (USART_GetFlagStatus(USART2,USART_FLAG_TC) == RESET);
     USART_SendData(USART2, (uint8_t)ch);
     return ch;
 }
+*/
 
 uint8_t usart2_rx_data;
 void USART2_IRQHandler(void)

@@ -17,11 +17,9 @@
 #ifndef __CAN1_BUS_H__
 #define __CAN1_BUS_H__
 
-#define ZGYRO_FEEDBACK_CAN_MSG_ID 0x401
+#include "CanBus.h"
 
-void Can1BusTask(void);
-
-extern float ZGyroAngle;
+void Can1BusTask(CanRxMsg* canRxMsg);
 
 #endif
 

@@ -16,8 +16,8 @@
  
 #include "main.h"
 
-/*-----USART3_TX-----PB10-----*/
-/*-----USART3_RX-----PB11-----*/
+/*-----USART3_TX-----PD8-----*/
+/*-----USART3_RX-----PD9-----*/
 
 FIFO* usart3_tx_fifo = NULL;
 
@@ -27,18 +27,18 @@ void USART3_Config(void)
     GPIO_InitTypeDef  gpio;
     NVIC_InitTypeDef  nvic;
 	
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB,ENABLE);
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD,ENABLE);
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3,ENABLE);
 
-    GPIO_PinAFConfig(GPIOB,GPIO_PinSource10,GPIO_AF_USART3);
-    GPIO_PinAFConfig(GPIOB,GPIO_PinSource11,GPIO_AF_USART3); 
+    GPIO_PinAFConfig(GPIOD,GPIO_PinSource8,GPIO_AF_USART3);
+    GPIO_PinAFConfig(GPIOD,GPIO_PinSource9,GPIO_AF_USART3); 
 
-    gpio.GPIO_Pin = GPIO_Pin_10 | GPIO_Pin_11;
+    gpio.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9;
     gpio.GPIO_Mode = GPIO_Mode_AF;
     gpio.GPIO_OType = GPIO_OType_PP;
     gpio.GPIO_Speed = GPIO_Speed_100MHz;
     gpio.GPIO_PuPd = GPIO_PuPd_NOPULL;
-    GPIO_Init(GPIOB,&gpio);
+    GPIO_Init(GPIOD,&gpio);
 
     usart3.USART_BaudRate = 115200;          // speed 10byte/ms
     usart3.USART_WordLength = USART_WordLength_8b;
@@ -92,14 +92,14 @@ void USART3_PrintBlock(uint8_t* pdata, uint8_t len)
     USART_ITConfig(USART3, USART_IT_TXE, ENABLE);
 }
 
-/*
+
 int fputc(int ch, FILE *f)
 {
     while (USART_GetFlagStatus(USART3,USART_FLAG_TC) == RESET);
     USART_SendData(USART3, (uint8_t)ch);
     return ch;
 }
-*/
+
 
 uint8_t usart3_rx_data;
 void USART3_IRQHandler(void)

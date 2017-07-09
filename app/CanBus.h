@@ -14,31 +14,23 @@
  * limitations under the License.
  */
  
-#ifndef __LED_H__
-#define __LED_H__
+#ifndef __CAN_BUS_H__
+#define __CAN_BUS_H__
 
-void Led_Config(void);
+#include "main.h"
 
-#define LED_GREEN_ON()      GPIO_ResetBits(GPIOF, GPIO_Pin_14)
-#define LED_GREEN_OFF()     GPIO_SetBits(GPIOF, GPIO_Pin_14)
-#define LED_GREEN_TOGGLE()      GPIO_ToggleBits(GPIOF, GPIO_Pin_14)
+#define ZGYRO_FEEDBACK_CAN_MSG_ID 0x401
 
-#define LED_RED_ON()            GPIO_ResetBits(GPIOE, GPIO_Pin_7)
-#define LED_RED_OFF()           GPIO_SetBits(GPIOE, GPIO_Pin_7)
-#define LED_RED_TOGGLE()        GPIO_ToggleBits(GPIOE, GPIO_Pin_7)
+void CanBusTask(CanRxMsg* canRxMsg);
 
-#define LED_ON()\
-LED_GREEN_ON();\
-LED_RED_ON()
+extern float ZGyroAngle;
 
-#define LED_OFF()\
-LED_GREEN_OFF();\
-LED_RED_OFF()
-
-
-#define LED_TOGGLE()\
-GPIO_ToggleBits(GPIOF, GPIO_Pin_14);\
-GPIO_ToggleBits(GPIOE, GPIO_Pin_7)
-
+extern Encoder CM1Encoder;
+extern Encoder CM2Encoder;
+extern Encoder CM3Encoder;
+extern Encoder CM4Encoder;
+extern Encoder GMYEncoder;
+extern Encoder GMPEncoder;
 
 #endif
+

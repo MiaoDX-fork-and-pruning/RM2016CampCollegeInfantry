@@ -17,15 +17,8 @@
 #ifndef __CAN2_BUS_H__
 #define __CAN2_BUS_H__
 
-#include "encoder.h"
+#include "CanBus.h"
 
-void Can2BusTask(void);
-
-extern Encoder CM1Encoder;
-extern Encoder CM2Encoder;
-extern Encoder CM3Encoder;
-extern Encoder CM4Encoder;
-extern Encoder GMYEncoder;
-extern Encoder GMPEncoder;
+void Can2BusTask(CanRxMsg* canRxMsg);
 
 #endif

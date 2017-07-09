@@ -22,3 +22,38 @@ In the `Options for target (魔术棒)` -> `Utilities` -> `Settings` -> `Flash D
 
 Just include the `CMSIS` in the installation folder.
 
+
+# Board Specific
+
+## LED
+
+``` cpp
+/*----GREEN LED----PA6-----'0' is on,'1' is off */
+/*----RED LED----PA7-----'0' is on,'1' is off */
+```
+
+## USART3
+
+``` vi
+# OLD
+-----USART3_TX-----PB10-----
+-----USART3_RX-----PB11-----
+
+# NEW
+-----USART3_TX-----PD8-----
+-----USART3_RX-----PD9-----                                     
+```
+
+The usart with function `int fputc(int ch, FILE *f)` will be treated as `STOUT`.
+
+## CAN1 BUS
+
+``` vi
+# OLD
+----CAN1_TX-----PA12----
+----CAN1_RX-----PA11----
+
+# NEW
+----CAN1_TX-----PD1----
+----CAN1_RX-----PD0----
+```
