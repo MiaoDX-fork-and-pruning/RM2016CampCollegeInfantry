@@ -226,12 +226,12 @@ void Controller_Reset(void)
 
 void ChassisMotorCurrentTransmit(void)
 {
-	SetCMCurrent(CAN2, chassisMotorCurrent.m1, chassisMotorCurrent.m2, chassisMotorCurrent.m3, chassisMotorCurrent.m4);
+	SetCMCurrent(CAN1, chassisMotorCurrent.m1, chassisMotorCurrent.m2, chassisMotorCurrent.m3, chassisMotorCurrent.m4);
 }
 
 void GimbalsMotorCurrentTransmit(void)
 {
-	SetGMCurrent(CAN2, gimbalsMotorCurrent.yaw, gimbalsMotorCurrent.pit);
+	SetGMCurrent(CAN1, gimbalsMotorCurrent.yaw, gimbalsMotorCurrent.pit);
 }
 
 static uint32_t ms_tick = 0;
