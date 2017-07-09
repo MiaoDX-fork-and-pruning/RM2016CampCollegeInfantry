@@ -95,7 +95,7 @@
   */           
 
 #if !defined  (HSE_VALUE) 
-  #define HSE_VALUE    ((uint32_t)25000000) /*!< Value of the External oscillator in Hz */
+  #define HSE_VALUE    ((uint32_t)12000000) /*!< Value of the External oscillator in Hz */ /* Change by miaodx, for F427 */
 #endif /* HSE_VALUE */
 
 /**
