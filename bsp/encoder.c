@@ -24,6 +24,7 @@ void Encoder_Process(Encoder* encoder, uint16_t value)
 	static const float ecd_to_rad_coeff = ecd_to_angle_coeff*angle_to_rad_coeff;
 	if(encoder->cnt < ENCODER_INIT_FRAME_COUNT)
 	{
+		//printf("enc++");
 		encoder->bias = value;
 		encoder->cnt++;
 	}
@@ -68,6 +69,7 @@ void Encoder_Process(Encoder* encoder, uint16_t value)
 
 uint8_t Encoder_IsOk(Encoder* encoder)
 {
+	//printf("{%d}", encoder->cnt);
 	return encoder->cnt == ENCODER_INIT_FRAME_COUNT;
 }
 

@@ -113,6 +113,7 @@ void USART1_IRQHandler(void)
 		DMA_Cmd(DMA2_Stream2, ENABLE);
 		if(this_time_rx_len == RC_FRAME_LEN)
 		{
+			//printf("*");
 			DBUS_DEC(&dbus, dbuf);
 			InputTask();
 		}

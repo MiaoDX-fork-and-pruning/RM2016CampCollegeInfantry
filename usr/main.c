@@ -26,7 +26,43 @@ void ShowZGyroData(void)
 	printf("z=%f\n", ZGyroAngle);
 }
 
+
+
 int main(void)
+{ 
+	uint32_t tick = 0;
+	BSP_Config();
+	delay_ms(500);
+	/*
+	MPU6050_Initialize();
+	MPU6050_IntConfiguration();     
+	MPU6050_EnableInt();
+	Init_Quaternion();
+	*/
+
+	
+	
+	while(1)
+	{	
+
+		LED_GREEN_ON();
+		delay_ms(1000);
+		LED_GREEN_OFF();
+		delay_ms(1000);
+		
+		LED_RED_ON();
+		delay_ms(1000);
+		LED_RED_OFF();
+		delay_ms(1000);
+		
+		printf("LET US CHEERS\n");
+		
+	}
+	
+}
+
+
+int main_(void)
 {
 	uint32_t tick = 0;
 	BSP_Config();

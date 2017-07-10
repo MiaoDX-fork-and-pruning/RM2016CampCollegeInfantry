@@ -72,6 +72,7 @@
 
 //common definition
 #define PI 3.1415926f
-#define MAP(val,min1,max1,min2,max2) ((val-min1)*(max2-min2)/(max1-min1)+min2)
+//#define MAP1(val,min1,max1,min2,max2) ((val-min1)*(max2-min2)/(max1-min1)+min2)
+//#define MAP(val,min1,max1,min2,max2) abs(MAP1(val,min1,max1,min2,max2))>abs(max2)?max2:MAP1(val,min1,max1,min2,max2)
 
 #endif 
