@@ -30,6 +30,17 @@ PID chassisSpeedXPid = CHASSIS_SPEED_PID_DEFAULT;
 PID chassisSpeedYPid = CHASSIS_SPEED_PID_DEFAULT;
 PID chassisSpeedZPid = CHASSIS_SPEED_PID_DEFAULT;
 
+
+PID chassisPositionPid1 = CHASSIS_POSITION_PID_DEFAULT;
+PID chassisPositionPid2 = CHASSIS_POSITION_PID_DEFAULT;
+PID chassisPositionPid3 = CHASSIS_POSITION_PID_DEFAULT;
+PID chassisPositionPid4 = CHASSIS_POSITION_PID_DEFAULT;
+PID chassisSpeedPid1 = CHASSIS_SPEED_PID_DEFAULT;
+PID chassisSpeedPid2 = CHASSIS_SPEED_PID_DEFAULT;
+PID chassisSpeedPid3 = CHASSIS_SPEED_PID_DEFAULT;
+PID chassisSpeedPid4 = CHASSIS_SPEED_PID_DEFAULT;
+
+
 PID gimbalsPositionYawPID = GIMBALS_POSITION_PID_DEFAULT;
 PID gimbalsPositionPitchPID = GIMBALS_POSITION_PID_DEFAULT;
 PID gimbalsSpeedYawPID = GIMBALS_SPEED_PID_DEFAULT;
@@ -40,6 +51,23 @@ Ramp gimbalsRamp = GIMBALS_RAMP_DEFAULT;
 
 ChassisMotorCurrent chassisMotorCurrent;
 GimbalsMotorCurrent gimbalsMotorCurrent;
+
+
+int ALL_Encoder_IsOk()
+{
+	/*
+	if(Encoder_IsOk(&CM1Encoder) && Encoder_IsOk(&CM2Encoder) && Encoder_IsOk(&CM3Encoder) && Encoder_IsOk(&CM4Encoder))
+	{
+		return 1;
+	}
+	*/
+	if(Encoder_IsOk(&CM3Encoder) && Encoder_IsOk(&CM4Encoder))
+	{
+		return 1;
+	}
+	
+	return 0;
+}
 
 void WorkingStateSM(void)
 {
@@ -53,14 +81,14 @@ void WorkingStateSM(void)
 	{
 		case WORKING_STATE_PREPARE:
 		{
-			if(Encoder_IsOk(&CM1Encoder) && Encoder_IsOk(&CM2Encoder) && Encoder_IsOk(&CM3Encoder) && Encoder_IsOk(&CM4Encoder))
+			if(ALL_Encoder_IsOk())
 			{
 				workingState = WORKING_STATE_NORMAL;
 			}
 		}break;
 		case WORKING_STATE_NORMAL:
 		{
-			if(!(Encoder_IsOk(&CM1Encoder) && Encoder_IsOk(&CM2Encoder) && Encoder_IsOk(&CM3Encoder) && Encoder_IsOk(&CM4Encoder)))
+			if(ALL_Encoder_IsOk() == 0)
 			{
 				workingState = WORKING_STATE_PREPARE;
 			}
@@ -87,6 +115,7 @@ void ChassisPositionControl(void)
 	mecanumPosition.w3 = CM3Encoder.rad;
 	mecanumPosition.w4 = CM4Encoder.rad;
 	
+	/*
 	Mecanum_Synthesis(&mecanumPosition);
 	
 	chassisPositionXPid.ref = chassisPosition.x;
@@ -104,6 +133,7 @@ void ChassisPositionControl(void)
 	chassisSpeed.x = chassisPositionXPid.output;
 	chassisSpeed.y = chassisPositionYPid.output;
 	chassisSpeed.z = chassisPositionZPid.output;
+	*/
 }
 
 void ChassisSpeedControl(void)
@@ -143,10 +173,20 @@ void ChassisCurrentControl(void)
 	
 	chassisRamp.Calc(&chassisRamp);
 	
+	/*
 	chassisMotorCurrent.m1 = mecanumCurrent.w1 * chassisRamp.output;
 	chassisMotorCurrent.m2 = mecanumCurrent.w2 * chassisRamp.output;
 	chassisMotorCurrent.m3 = mecanumCurrent.w3 * chassisRamp.output;
 	chassisMotorCurrent.m4 = mecanumCurrent.w4 * chassisRamp.output;
+	*/
+	chassisMotorCurrent.m1 = mecanumCurrent.w1;
+	chassisMotorCurrent.m2 = mecanumCurrent.w2;
+	chassisMotorCurrent.m3 = mecanumCurrent.w3;
+	chassisMotorCurrent.m4 = mecanumCurrent.w4;
+	
+	
+	printf("CCX:%f", chassisCurrent.x);
+	printf("CM1:%d", chassisMotorCurrent.m1);
 }
 
 void GimbalsPositionControl(void)
@@ -231,7 +271,7 @@ void ChassisMotorCurrentTransmit(void)
 
 void GimbalsMotorCurrentTransmit(void)
 {
-	SetGMCurrent(CAN1, gimbalsMotorCurrent.yaw, gimbalsMotorCurrent.pit);
+	//SetGMCurrent(CAN1, gimbalsMotorCurrent.yaw, gimbalsMotorCurrent.pit);
 }
 
 static uint32_t ms_tick = 0;
@@ -241,11 +281,13 @@ void ControlTask(void)
 	WorkingStateSM();
 	if(lastWorkingState == WORKING_STATE_STOP && workingState == WORKING_STATE_PREPARE)
 	{
+		printf("Going to reset the variables and prepare");
 		ms_tick = 0;
 		Controller_Reset();
 	}
 	else if(workingState == WORKING_STATE_NORMAL)
 	{
+		//printf("run");
 		if(lastCtrlMode != ctrlMode)
 		{
 			//Ramp_ResetAll();
@@ -271,6 +313,7 @@ void ControlTask(void)
 			{
 				if(ms_tick % 4  == 0)
 				{
+					//printf("Speed");
 					ChassisSpeedControl();
 					ChassisCurrentControl();
 					GimbalsSpeedControl();

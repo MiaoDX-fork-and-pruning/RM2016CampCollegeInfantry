@@ -23,8 +23,13 @@ CtrlMode lastCtrlMode = CTRL_MODE_SPEED;
 SwitchPanel switchPanel;
 Keyboard keyboard;
 
+/*
 ChassisPosition chassisPosition;
 ChassisSpeed chassisSpeed;
+*/
+ChassisPositionFour chassisPositionFour;
+ChassisSpeedFour chassisSpeedFour;
+
 ChassisCurrent chassisCurrent;
 GimbalsPosition gimbalsPosition;
 GimbalsSpeed gimbalsSpeed;
@@ -258,10 +263,12 @@ void GetMouseCtrlGimbalsCurrent(void)
 
 void InputTask(void)
 {
-	GetInputMode();
+	GetInputMode();	
 	GetCtrlMode();
+	//printf("%d", inputMode);
+	//printf("%d", ctrlMode);
 	if(inputMode == INPUT_MODE_RC)
-	{
+	{		
 		GetSwitchPanel();
 		switch(ctrlMode)
 		{
@@ -314,4 +321,17 @@ void InputTask(void)
 		}
 		
 	}
+}
+
+float MAP(float val, float min1, float max1, float min2, float max2)
+{
+	float cal = (val-min1)*(max2-min2)/(max1-min1)+min2;
+	//printf("cal:%f", cal);
+	if(abs(cal)>abs(max2)+0.001){
+		//printf("Too large:%f", max2);
+		return max2;
+	}
+		
+	
+	return cal;
 }

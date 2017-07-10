@@ -84,6 +84,22 @@ typedef struct
 
 typedef struct
 {
+	float p1;
+	float p2;
+	float p3;
+	float p4;
+}ChassisPositionFour;
+
+typedef struct
+{
+	float v1;
+	float v2;
+	float v3;
+	float v4;
+}ChassisSpeedFour;
+
+typedef struct
+{
 	float x;
 	float y;
 	float z;
@@ -140,6 +156,7 @@ typedef struct
 }Keyboard;
 
 void InputTask(void);
+float MAP(float val, float min1, float max1, float min2, float max2);
 
 extern InputMode inputMode;
 extern CtrlMode ctrlMode;
