@@ -60,8 +60,8 @@ void CAN2_Config(void)
     can.CAN_Mode = CAN_Mode_Normal; 
     can.CAN_SJW  = CAN_SJW_1tq;
     can.CAN_BS1 = CAN_BS1_9tq;
-    can.CAN_BS2 = CAN_BS2_4tq;
-    can.CAN_Prescaler = 3;   //CAN BaudRate 42/(1+9+4)/3=1Mbps
+    can.CAN_BS2 = CAN_BS2_5tq;
+    can.CAN_Prescaler = 3;    //CAN BaudRate 45/(1+9+5)/3=1Mbps
     CAN_Init(CAN2, &can);
     
     can_filter.CAN_FilterNumber=14;//14
@@ -89,7 +89,8 @@ void CAN2_TX_IRQHandler(void)
 
 CanRxMsg can2RxMsg;
 void CAN2_RX0_IRQHandler(void)
-{
+{		
+		//printf(",");
     if (CAN_GetITStatus(CAN2,CAN_IT_FMP0)!= RESET) 
     {
         CAN_ClearITPendingBit(CAN2, CAN_IT_FMP0);

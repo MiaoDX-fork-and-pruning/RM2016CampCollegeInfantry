@@ -30,10 +30,9 @@ Encoder GMPEncoder = {0};
 
 void CanBusTask(CanRxMsg* canRxMsg)
 {      
+
+	uint16_t value = (canRxMsg->Data[0]<<8) | canRxMsg->Data[1];
 	switch(canRxMsg->StdId)
-	{
-	uint16_t value = (can2RxMsg.Data[0]<<8) | can2RxMsg.Data[1];
-	switch(can2RxMsg.StdId)
 	{
 		case MOTOR1_FEEDBACK_CAN_MSG_ID:
 		{
@@ -61,13 +60,13 @@ void CanBusTask(CanRxMsg* canRxMsg)
 		}break;
 		case ZGYRO_FEEDBACK_CAN_MSG_ID:
 		{
-			ZGyroAngle = -0.01f*((int32_t)(can2RxMsg.Data[0]<<24)|(int32_t)(can2RxMsg.Data[1]<<16) | (int32_t)(can2RxMsg.Data[2]<<8) | (int32_t)(can2RxMsg.Data[3]));
+			ZGyroAngle = -0.01f*((int32_t)(canRxMsg->Data[0]<<24)|(int32_t)(canRxMsg->Data[1]<<16) | (int32_t)(canRxMsg->Data[2]<<8) | (int32_t)(canRxMsg->Data[3]));
 			
 		}break;		
 		default:
 		{
 		}break;
 	}
-	}
+	
 }
 

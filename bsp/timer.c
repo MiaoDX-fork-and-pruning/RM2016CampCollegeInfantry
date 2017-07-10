@@ -29,7 +29,7 @@ void TIM6_Config(void)
     nvic.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&nvic);
 
-    tim.TIM_Prescaler = 84-1;        //84M internal clock
+    tim.TIM_Prescaler = 90-1;        //90M internal clock
     tim.TIM_CounterMode = TIM_CounterMode_Up;
     tim.TIM_ClockDivision = TIM_CKD_DIV1;
     tim.TIM_Period = 1000;  //1ms,1000Hz
@@ -52,14 +52,15 @@ void TIM6_DAC_IRQHandler(void)
 {
 	if (TIM_GetITStatus(TIM6,TIM_IT_Update)!= RESET) 
 	{
+		//printf("T6");
 		TIM_ClearITPendingBit(TIM6,TIM_IT_Update);
 		TIM_ClearFlag(TIM6, TIM_FLAG_Update);
-		ControlTask();
+		ControlTask(); // The tricks are all here
 	}
 }
 
 //Timer 2 32-bit counter  
-//Timer Clock is 168MHz / 4 * 2 = 84M
+//Timer Clock is 180MHz / 4 * 2 = 90M
 void TIM2_Config(void)
 {
 	
@@ -69,15 +70,15 @@ void TIM2_Config(void)
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2,ENABLE);
 	
 	tim.TIM_Period = 0xFFFFFFFF;
-    tim.TIM_Prescaler = 84 - 1;
+    tim.TIM_Prescaler = 90 - 1;
     tim.TIM_ClockDivision = TIM_CKD_DIV1;	
     tim.TIM_CounterMode = TIM_CounterMode_Up;  
     TIM_ARRPreloadConfig(TIM2, ENABLE);
     TIM_TimeBaseInit(TIM2, &tim);
 	
 	nvic.NVIC_IRQChannel = TIM2_IRQn;
-    nvic.NVIC_IRQChannelPreemptionPriority = 2;
-    nvic.NVIC_IRQChannelSubPriority = 2;
+    nvic.NVIC_IRQChannelPreemptionPriority = 0;
+    nvic.NVIC_IRQChannelSubPriority = 0;
     nvic.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&nvic);
 }
@@ -98,6 +99,7 @@ void TIM2_IRQHandler(void)
 {
 	if (TIM_GetITStatus(TIM2,TIM_IT_Update)!= RESET) 
 	{
+		//printf("T2");
 		TIM_ClearITPendingBit(TIM2,TIM_IT_Update);
 		TIM_ClearFlag(TIM2, TIM_FLAG_Update);
 	}
