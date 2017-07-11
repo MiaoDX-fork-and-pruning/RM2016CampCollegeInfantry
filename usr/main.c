@@ -30,7 +30,7 @@ void ShowZGyroData(void)
 
 int main(void)
 { 
-	uint32_t tick = 0;
+	//uint32_t tick = 0;
 	BSP_Config();
 	delay_ms(500);
 	/*
