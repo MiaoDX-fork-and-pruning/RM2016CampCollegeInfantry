@@ -16,6 +16,8 @@
  
 #include "main.h"
 
+#define USE_Mecanum_Synthesis 0
+
 WorkingState workingState = WORKING_STATE_PREPARE;
 WorkingState lastWorkingState = WORKING_STATE_PREPARE;
 
@@ -115,12 +117,13 @@ void ChassisPositionControl(void)
 	mecanumPosition.w3 = CM3Encoder.rad;
 	mecanumPosition.w4 = CM4Encoder.rad;
 	
-	/*
+#if USE_Mecanum_Synthesis
+	
 	Mecanum_Synthesis(&mecanumPosition);
 	
-	chassisPositionXPid.ref = chassisPosition.x;
-	chassisPositionYPid.ref = chassisPosition.y;
-	chassisPositionZPid.ref = chassisPosition.z;
+	chassisPositionXPid.ref = chassisPositionTarget.x;
+	chassisPositionYPid.ref = chassisPositionTarget.y;
+	chassisPositionZPid.ref = chassisPositionTarget.z;
 	
 	chassisPositionXPid.fdb = mecanumPosition.x;
 	chassisPositionYPid.fdb = mecanumPosition.y;
@@ -130,10 +133,35 @@ void ChassisPositionControl(void)
 	chassisPositionYPid.Calc(&chassisPositionYPid);
 	chassisPositionZPid.Calc(&chassisPositionZPid);
 	
-	chassisSpeed.x = chassisPositionXPid.output;
-	chassisSpeed.y = chassisPositionYPid.output;
-	chassisSpeed.z = chassisPositionZPid.output;
-	*/
+	chassisSpeedTarget.x = chassisPositionXPid.output;
+	chassisSpeedTarget.y = chassisPositionYPid.output;
+	chassisSpeedTarget.z = chassisPositionZPid.output;
+
+#else
+	
+	Mecanum_Decompose(&chassisPositionTarget); // Decompose to four wheels
+	
+	chassisPositionPid1.ref = chassisPositionTarget.w1;
+	chassisPositionPid2.ref = chassisPositionTarget.w2;
+	chassisPositionPid3.ref = chassisPositionTarget.w3;
+	chassisPositionPid4.ref = chassisPositionTarget.w4;
+	
+	chassisPositionPid1.fdb = mecanumPosition.w1;
+	chassisPositionPid2.fdb = mecanumPosition.w2;
+	chassisPositionPid3.fdb = mecanumPosition.w3;
+	chassisPositionPid4.fdb = mecanumPosition.w4;
+	
+	chassisSpeedPid1.Calc(&chassisSpeedPid1);
+	chassisSpeedPid2.Calc(&chassisSpeedPid2);
+	chassisSpeedPid3.Calc(&chassisSpeedPid3);
+	chassisSpeedPid4.Calc(&chassisSpeedPid4);
+	
+	chassisSpeedTarget.w1 = chassisSpeedPid1.output;
+	chassisSpeedTarget.w2 = chassisSpeedPid2.output;
+	chassisSpeedTarget.w3 = chassisSpeedPid3.output;
+	chassisSpeedTarget.w4 = chassisSpeedPid4.output;
+	
+#endif
 }
 
 void ChassisSpeedControl(void)
@@ -143,12 +171,14 @@ void ChassisSpeedControl(void)
 	mecanumSpeed.w2 = CM2Encoder.rad_rate;
 	mecanumSpeed.w3 = CM3Encoder.rad_rate;
 	mecanumSpeed.w4 = CM4Encoder.rad_rate;
+
+#if USE_Mecanum_Synthesis
 	
 	Mecanum_Synthesis(&mecanumSpeed);
 	
-	chassisSpeedXPid.ref = chassisSpeed.x;
-	chassisSpeedYPid.ref = chassisSpeed.y;
-	chassisSpeedZPid.ref = chassisSpeed.z;
+	chassisSpeedXPid.ref = chassisSpeedTarget.x;
+	chassisSpeedYPid.ref = chassisSpeedTarget.y;
+	chassisSpeedZPid.ref = chassisSpeedTarget.z;
 	
 	chassisSpeedXPid.fdb = mecanumSpeed.x;
 	chassisSpeedYPid.fdb = mecanumSpeed.y;
@@ -158,35 +188,60 @@ void ChassisSpeedControl(void)
 	chassisSpeedYPid.Calc(&chassisSpeedYPid);
 	chassisSpeedZPid.Calc(&chassisSpeedZPid);
 	
-	chassisCurrent.x = chassisSpeedXPid.output;
-	chassisCurrent.y = chassisSpeedYPid.output;
-	chassisCurrent.z = chassisSpeedZPid.output;
+	mecanumCurrent.x = chassisSpeedXPid.output;
+	mecanumCurrent.y = chassisSpeedYPid.output;
+	mecanumCurrent.z = chassisSpeedZPid.output;
+	
+#else
+	
+	Mecanum_Decompose(&chassisSpeedTarget); // Decompose to four wheels
+	
+	chassisSpeedPid1.ref = chassisSpeedTarget.w1;
+	chassisSpeedPid2.ref = chassisSpeedTarget.w2;
+	chassisSpeedPid3.ref = chassisSpeedTarget.w3;
+	chassisSpeedPid4.ref = chassisSpeedTarget.w4;
+	
+	chassisSpeedPid1.fdb = mecanumSpeed.w1;
+	chassisSpeedPid2.fdb = mecanumSpeed.w2;
+	chassisSpeedPid3.fdb = mecanumSpeed.w3;
+	chassisSpeedPid4.fdb = mecanumSpeed.w4;
+	
+	chassisSpeedPid1.Calc(&chassisSpeedPid1);
+	chassisSpeedPid2.Calc(&chassisSpeedPid2);
+	chassisSpeedPid3.Calc(&chassisSpeedPid3);
+	chassisSpeedPid4.Calc(&chassisSpeedPid4);
+	
+	mecanumCurrent.w1 = chassisSpeedPid1.output;
+	mecanumCurrent.w2 = chassisSpeedPid2.output;
+	mecanumCurrent.w3 = chassisSpeedPid3.output;
+	mecanumCurrent.w4 = chassisSpeedPid4.output;
+
+#endif
 }
 
 void ChassisCurrentControl(void)
 {
-	mecanumCurrent.x = chassisCurrent.x;
-	mecanumCurrent.y = chassisCurrent.y;
-	mecanumCurrent.z = chassisCurrent.z;
-	
+
+#if USE_Mecanum_Synthesis
 	Mecanum_Decompose(&mecanumCurrent);
-	
-	chassisRamp.Calc(&chassisRamp);
+#endif
 	
 	/*
+	chassisRamp.Calc(&chassisRamp);
+	
 	chassisMotorCurrent.m1 = mecanumCurrent.w1 * chassisRamp.output;
 	chassisMotorCurrent.m2 = mecanumCurrent.w2 * chassisRamp.output;
 	chassisMotorCurrent.m3 = mecanumCurrent.w3 * chassisRamp.output;
 	chassisMotorCurrent.m4 = mecanumCurrent.w4 * chassisRamp.output;
 	*/
+	
 	chassisMotorCurrent.m1 = mecanumCurrent.w1;
 	chassisMotorCurrent.m2 = mecanumCurrent.w2;
 	chassisMotorCurrent.m3 = mecanumCurrent.w3;
 	chassisMotorCurrent.m4 = mecanumCurrent.w4;
 	
 	
-	printf("CCX:%f", chassisCurrent.x);
-	printf("CM1:%d", chassisMotorCurrent.m1);
+	//printf("CCX:%d", chassisMotorCurrent.m1);
 }
 
 void GimbalsPositionControl(void)
@@ -322,6 +377,21 @@ void ControlTask(void)
 					GimbalsMotorCurrentTransmit();
 				}
 			}break;
+			case CTRL_MODE_PROGRAM: // Set position by program
+			{
+				if(ms_tick % 4 == 0)
+				{
+					ChassisPositionControl();
+					ChassisSpeedControl();
+					ChassisCurrentControl();
+					GimbalsPositionControl();
+					GimbalsSpeedControl();
+					GimbalsCurrentControl();
+					ChassisMotorCurrentTransmit();
+					GimbalsMotorCurrentTransmit();
+				}
+			}break;
+			/*
 			case CTRL_MODE_CURRENT:
 			{
 				if(ms_tick % 4  == 0)
@@ -332,6 +402,7 @@ void ControlTask(void)
 					GimbalsMotorCurrentTransmit();
 				}
 			}break;
+			*/
 			default:
 			{
 			}break;

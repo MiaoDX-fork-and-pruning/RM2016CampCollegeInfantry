@@ -65,9 +65,11 @@ typedef enum
 {
 	CTRL_MODE_POSITION = 0x00,
 	CTRL_MODE_SPEED = 0x01,
-	CTRL_MODE_CURRENT = 0x02,
+	//CTRL_MODE_CURRENT = 0x02,
+	CTRL_MODE_PROGRAM = 0x02,
 }CtrlMode;
 
+/*
 typedef struct
 {
 	float x;
@@ -81,22 +83,7 @@ typedef struct
 	float y;
 	float z;
 }ChassisSpeed;
-
-typedef struct
-{
-	float p1;
-	float p2;
-	float p3;
-	float p4;
-}ChassisPositionFour;
-
-typedef struct
-{
-	float v1;
-	float v2;
-	float v3;
-	float v4;
-}ChassisSpeedFour;
+*/
 
 typedef struct
 {
@@ -104,6 +91,7 @@ typedef struct
 	float y;
 	float z;
 }ChassisCurrent;
+
 
 typedef struct
 {
@@ -163,9 +151,13 @@ extern CtrlMode ctrlMode;
 extern CtrlMode lastCtrlMode;
 extern SwitchPanel switchPanel;
 extern Keyboard keyboard;
-extern ChassisPosition chassisPosition;
-extern ChassisSpeed chassisSpeed;
-extern ChassisCurrent chassisCurrent;
+//extern ChassisPosition chassisPositionTarget;
+//extern ChassisSpeed chassisSpeedTarget;
+extern Mecanum chassisPositionTarget;
+extern Mecanum chassisSpeedTarget;
+
+extern ChassisCurrent chassisCurrentTarget;
+
 extern GimbalsPosition gimbalsPosition;
 extern GimbalsSpeed gimbalsSpeed;
 extern GimbalsCurrent gimbalsCurrent;
