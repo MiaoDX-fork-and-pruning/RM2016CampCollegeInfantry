@@ -57,3 +57,19 @@ The usart with function `int fputc(int ch, FILE *f)` will be treated as `STOUT`.
 ----CAN1_TX-----PD1----
 ----CAN1_RX-----PD0----
 ```
+
+# PID TUNNING
+
+* Controller.h
+
+``` 
+#define CHASSIS_SPEED_PID_DEFAULT 	 PID_CREATE(20,0.5,5,4950,0,0,4950)
+```
+
+* InputScanner.h
+
+```
+#define INPUT_CHASSIS_SPEED_MAX    20.0f
+```
+
+Change the pid variables and max speed and see the debug output, try to find proper pairs.
