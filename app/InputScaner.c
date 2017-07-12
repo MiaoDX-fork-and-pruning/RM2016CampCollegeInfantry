@@ -44,9 +44,9 @@ MAFilterF32* mafilter_x_m = NULL;
 MAFilterF32* mafilter_y_m = NULL;
 MAFilterF32* mafilter_z_m = NULL;
 
-#define MAF_CALC_Mecanum_NUM 50
-Ramp chassisRampPOS = CHASSIS_RAMP_DEFAULT;
-
+#define MAF_CALC_Mecanum_NUM 150 // The bigger, the longer time to get desired value
+Ramp chassisRampPOS = CHASSIS_RAMP_LONGER;
+#define InputScannerDEBUG 0
 
 void GetInputMode(void)
 {
@@ -129,37 +129,71 @@ void GetKeyboard(void)
 }
 
 
-
-void MAF_CALC_Mecanum(Mecanum* mecanumVar, InputMode InputModeCalc)
+int maf_i = 0;
+void MAF_CALC_Mecanum(Mecanum* mecanumVar)
 {
-	if(mafilter_x == NULL) mafilter_x_m = MAFilterF32_Create(MAF_CALC_Mecanum_NUM);
-	if(mafilter_y == NULL) mafilter_y_m = MAFilterF32_Create(MAF_CALC_Mecanum_NUM);
-	if(mafilter_z == NULL) mafilter_z_m = MAFilterF32_Create(MAF_CALC_Mecanum_NUM);
-	if(lastInputMode != InputModeCalc) // MODE CHANGED, maybe can just use `inputMode` instead of `InputModeCalc`
+	if(mafilter_x_m == NULL) mafilter_x_m = MAFilterF32_Create(MAF_CALC_Mecanum_NUM);
+	if(mafilter_y_m == NULL) mafilter_y_m = MAFilterF32_Create(MAF_CALC_Mecanum_NUM);
+	if(mafilter_z_m == NULL) mafilter_z_m = MAFilterF32_Create(MAF_CALC_Mecanum_NUM);
+	if(lastWorkingState == WORKING_STATE_STOP && workingState == WORKING_STATE_PREPARE)
 	{
 		MAFilterF32_Reset(mafilter_x);
 		MAFilterF32_Reset(mafilter_y);
 		MAFilterF32_Reset(mafilter_z);
 	}
+
+#if InputScannerDEBUG	
+	maf_i ++;
+	if(maf_i >= 10)
+	{
+		printf("MAF IN:{%f,%f,%f}\n", mecanumVar->x, mecanumVar->y, mecanumVar->z);
+	}
+#endif	
 	
 	mecanumVar->x = MAFilterF32_Calc(mafilter_x_m, mecanumVar->x);
 	mecanumVar->y = MAFilterF32_Calc(mafilter_y_m, mecanumVar->y);
 	mecanumVar->z = MAFilterF32_Calc(mafilter_z_m, mecanumVar->z);
+
+#if InputScannerDEBUG	
+	if(maf_i >= 10)
+	{
+		printf("MAF OUT:{%f,%f,%f}\n", mecanumVar->x, mecanumVar->y, mecanumVar->z);
+		maf_i = 0;
+	}
+#endif		
 }
 
-void RAMP_CALC_Mecanum(Mecanum* mecanumVar, InputMode InputModeCalc)
+int ramp_i = 0;
+void RAMP_CALC_Mecanum(Mecanum* mecanumVar)
 {
 	
-	if(lastInputMode != InputModeCalc) // MODE CHANGED, maybe can just use `inputMode` instead of `InputModeCalc`
+	if(lastWorkingState == WORKING_STATE_STOP && workingState == WORKING_STATE_PREPARE)
 	{
 		Ramp_ResetCounter(&chassisRampPOS);
 	}
 	
 	chassisRampPOS.Calc(&chassisRampPOS);
+
+#if InputScannerDEBUG		
+	ramp_i ++;
+	if(ramp_i >= 10)
+	{
+		printf("RAMP IN:{%f,%f,%f}\n", mecanumVar->x, mecanumVar->y, mecanumVar->z);
+		printf("chassisRampPOS.output:%f\n", chassisRampPOS.output);
+	}
+#endif	
 	
 	mecanumVar->x = mecanumVar->x * chassisRampPOS.output;
 	mecanumVar->y = mecanumVar->y * chassisRampPOS.output;
 	mecanumVar->z = mecanumVar->z * chassisRampPOS.output;
+
+#if InputScannerDEBUG		
+	if(ramp_i >= 10)
+	{
+		printf("RAMP OUT:{%f,%f,%f}\n", mecanumVar->x, mecanumVar->y, mecanumVar->z);
+		ramp_i = 0;
+	}
+#endif	
 }
 
 void GetStickCtrlChassisPositionProgram(void)
@@ -171,7 +205,9 @@ void GetStickCtrlChassisPositionProgram(void)
 	chassisPositionTarget.y = MAP(targetY, CH_MIN, CH_MAX, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX);
 	chassisPositionTarget.z = MAP(targetZ, CH_MIN, CH_MAX, -INPUT_GIMBALS_POSITION_MAX, INPUT_GIMBALS_POSITION_MAX);
 	
-	RAMP_CALC_Mecanum(&chassisPositionTarget, INPUT_MODE_RC);
+	// BEFORE USING RAMP, WE SHOULD RESET IT!!!
+	
+	RAMP_CALC_Mecanum(&chassisPositionTarget);
 	
 	// Mecanum_Decompose(&chassisPositionTarget); // Decompose to four wheels
 }
@@ -180,12 +216,14 @@ void GetStickCtrlChassisPositionProgram(void)
 
 void GetStickCtrlChassisPosition(void)
 {
+	//printf("<P:\n");
 	chassisPositionTarget.x = MAP(dbus.rc.ch0, CH_MIN, CH_MAX, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX);
 	chassisPositionTarget.y = MAP(dbus.rc.ch1, CH_MIN, CH_MAX, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX);
 	chassisPositionTarget.z = MAP(dbus.rc.ch2, CH_MIN, CH_MAX, -INPUT_GIMBALS_POSITION_MAX, INPUT_GIMBALS_POSITION_MAX);
 	
-	MAF_CALC_Mecanum(&chassisPositionTarget, INPUT_MODE_RC);
+	MAF_CALC_Mecanum(&chassisPositionTarget);
 	
+	//printf(":P>\n");
 	// Mecanum_Decompose(&chassisPositionTarget); // Decompose to four wheels
 }
 
@@ -195,7 +233,7 @@ void GetStickCtrlChassisSpeed(void)
 	chassisSpeedTarget.y = MAP(dbus.rc.ch1, CH_MIN, CH_MAX, -INPUT_CHASSIS_SPEED_MAX, INPUT_CHASSIS_SPEED_MAX);
 	chassisSpeedTarget.z = MAP(dbus.rc.ch2, CH_MIN, CH_MAX, -INPUT_GIMBALS_SPEED_MAX, INPUT_GIMBALS_SPEED_MAX);
 	
-	MAF_CALC_Mecanum(&chassisSpeedTarget, INPUT_MODE_RC);
+	// MAF_CALC_Mecanum(&chassisSpeedTarget);
 	
 	// Mecanum_Decompose(&chassisSpeedTarget); // Decompose to four wheels
 }

@@ -21,12 +21,14 @@
 #include "mecanum.h"
 
 #define CHASSIS_POSITION_PID_DEFAULT PID_CREATE(3,0,0,8,0,0,8)
-#define CHASSIS_SPEED_PID_DEFAULT 	 PID_CREATE(300,0,0,4950,0,0,4950)
+#define CHASSIS_SPEED_PID_DEFAULT 	 PID_CREATE(20,0.5,5,4950,0,0,4950)
 #define GIMBALS_POSITION_PID_DEFAULT PID_CREATE(2,0,0,5,0,0,5)
 #define GIMBALS_SPEED_PID_DEFAULT 	 PID_CREATE(300,0,0,4950,0,0,4950)
 
 #define CHASSIS_RAMP_DEFAULT RAMP(100, RAMP_DIR_UP)
 #define GIMBALS_RAMP_DEFAULT RAMP(100, RAMP_DIR_UP)
+
+#define CHASSIS_RAMP_LONGER RAMP(420, RAMP_DIR_UP)
 
 typedef enum
 {
@@ -52,6 +54,8 @@ typedef struct
 void ControlTask(void);
 
 extern WorkingState workingState;
+extern WorkingState lastWorkingState;
+
 extern Mecanum mecanumPosition;
 extern Mecanum mecanumSpeed;
 extern Mecanum mecanumCurrent;
