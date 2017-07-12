@@ -44,18 +44,24 @@ int main(void)
 	
 	while(1)
 	{	
-
-		LED_GREEN_ON();
-		delay_ms(1000);
-		LED_GREEN_OFF();
-		delay_ms(1000);
 		
+		if(Micros() % 1000000 == 0){
+			LED_GREEN_ON();
+		}
+		if(Micros() % 2000000 == 0){
+			LED_GREEN_OFF();
+		}
+		
+		/*
 		LED_RED_ON();
 		delay_ms(1000);
 		LED_RED_OFF();
 		delay_ms(1000);
+		*/
+		if(Micros() % 4000000 == 0){
+			printf("LET US CHEERS\n");
+		}
 		
-		printf("LET US CHEERS\n");
 		
 	}
 	
