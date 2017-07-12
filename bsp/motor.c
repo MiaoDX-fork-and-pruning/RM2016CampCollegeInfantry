@@ -16,12 +16,10 @@
  
 #include "main.h"
 
+
 void SetCMCurrent(CAN_TypeDef *CANx, int16_t c201, int16_t c202, int16_t c203, int16_t c204)
 {
-	//printf(">> CM:\r\n");
-	//printf("{c201:%d,c202:%d,c203:%d,c204:%d}", c201, c202, c203, c204);
-	//printf("{c201:%d}", c201);
-	
+
 	CanTxMsg canTxMsg;
     canTxMsg.StdId = CHASSIS_MOTOR_CAN_TX_MSG_ID;
     canTxMsg.IDE = CAN_Id_Standard;
@@ -36,7 +34,7 @@ void SetCMCurrent(CAN_TypeDef *CANx, int16_t c201, int16_t c202, int16_t c203, i
     canTxMsg.Data[5] = (uint8_t)c203;
     canTxMsg.Data[6] = (uint8_t)(c204 >> 8);
     canTxMsg.Data[7] = (uint8_t)c204;
-    //CAN_Transmit(CANx,&canTxMsg);
+    CAN_Transmit(CANx,&canTxMsg);
 }
 
 void SetGMCurrent(CAN_TypeDef *CANx, int16_t c205, int16_t c206)

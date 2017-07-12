@@ -142,7 +142,7 @@ u8 NRF24L01_Rx(u8 *rxbuf)
 {
 	u8 state;		    							      
 	state=NRF24L01_ReadReg(STATUS);                //读取状态寄存器的值    	 
-        //printf("\n\r Rx state %X", state);
+        //printf("\n Rx state %X", state);
 	NRF24L01_WriteReg(SPI_WRITE_REG+STATUS,state); //清除TX_DS或MAX_RT中断标志
 	if(state&RX_OK)                                 //接收到数据
 	{

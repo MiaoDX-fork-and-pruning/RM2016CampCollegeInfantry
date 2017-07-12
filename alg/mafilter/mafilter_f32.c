@@ -19,6 +19,7 @@
 /****************************************/
 
 #include "mafilter_f32.h"
+#include "main.h"
 
 void MAFilterF32_Init(MAFilterF32* mafilter, float* buf, uint32_t len)
 {
@@ -32,6 +33,7 @@ void MAFilterF32_Init(MAFilterF32* mafilter, float* buf, uint32_t len)
 
 MAFilterF32* MAFilterF32_Create(uint32_t len)
 {
+	printf("MAFilterF32_Create\n");
 	MAFilterF32* mafilter = (MAFilterF32*)malloc(sizeof(MAFilterF32));
 	if(mafilter == NULL) return NULL;
 	mafilter->buf = (float*)malloc(sizeof(float)*len);
@@ -43,6 +45,7 @@ MAFilterF32* MAFilterF32_Create(uint32_t len)
 	mafilter->ptr = 0;
 	mafilter->sum = 0;
 	mafilter->out = 0;
+	printf("MAFilterF32_Create done\n");
 	return mafilter;
 }
 
