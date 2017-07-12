@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
+#include "main.h"
 #include "mecanum.h"
+
 
 /*******************************************/
 /* Mecanum Wheel Power Transmission System */
@@ -40,4 +42,10 @@ void Mecanum_Decompose(Mecanum* mecanum)
 	mecanum->w2 = ( mecanum->x + mecanum->y + mecanum->z * MECANUM_L) / MECANUM_R;
 	mecanum->w3 = (-mecanum->x + mecanum->y + mecanum->z * MECANUM_L) / MECANUM_R;
 	mecanum->w4 = (-mecanum->x - mecanum->y + mecanum->z * MECANUM_L) / MECANUM_R;
+}
+
+void Mecanum_Debug(Mecanum* mecanum)
+{
+	printf("\n<\nx:%f\t,y:%f\t,z:%f\n", mecanum->x,mecanum->y,mecanum->z);
+	printf("w1:%f\t,w2:%f\t,w3:%f\t,w4:%f\n>\n", mecanum->w1,mecanum->w2,mecanum->w3,mecanum->w4);
 }
