@@ -78,3 +78,32 @@ void Encoder_Reset(Encoder* encoder)
 	memset(encoder, 0, sizeof(Encoder));
 }
 
+
+void Encoder_Debug(Encoder* encoder)
+{
+/*
+	uint16_t value;
+	uint16_t last_value;
+	int32_t diff;
+	uint16_t bias;
+	int32_t round;
+	float angle;
+	float rad;
+	int32_t rate_raw;
+	int32_t rate_buf[ENCODER_RATE_BUF_SIZE];
+	uint8_t rate_cnt;
+	uint8_t rate_ptr;
+	int32_t rate_sum;
+	int32_t rate;
+	float angle_rate;
+	float rad_rate;
+	uint32_t cnt;
+*/
+	printf("value:%d\t", encoder->value);
+	printf("round:%d\t", encoder->round);
+	printf("angle:%f\t", encoder->angle);
+	printf("rate:%d\t", encoder->rate);
+	printf("rad_rate:%f\t", encoder->rad_rate);
+	printf("cnt:%d\n", encoder->cnt);
+
+}

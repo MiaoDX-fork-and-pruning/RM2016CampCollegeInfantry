@@ -20,7 +20,8 @@
 #include <stdint.h>
 
 #define ENCODER_VAL_MAX 8191           
-#define ENCODER_DIFF_MAX 7500          
+//#define ENCODER_DIFF_MAX 7500          
+#define ENCODER_DIFF_MAX 4096          
 #define ENCODER_RATE_BUF_SIZE 10       
 #define ENCODER_INIT_FRAME_COUNT 100
 
@@ -47,5 +48,7 @@ typedef struct Encoder
 void Encoder_Process(Encoder* encoder, uint16_t value);
 uint8_t Encoder_IsOk(Encoder* encoder);
 void Encoder_Reset(Encoder* encoder);
+
+void Encoder_Debug(Encoder* encoder);
 
 #endif

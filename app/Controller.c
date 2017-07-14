@@ -18,7 +18,7 @@
 
 #define USE_Mecanum_Synthesis 0
 #define ControllerDEBUG	1
-#define ControllerDEBUGNUM 800
+#define ControllerDEBUGNUM 1000
 uint32_t debug_tick = 0;
 /*
 #if ControllerDEBUG
@@ -118,10 +118,18 @@ void WorkingStateSM(void)
 void ChassisPositionControl(void)
 {
 	/* Mecanum Position Synthesis */
+	/*
 	mecanumPosition.w1 = CM1Encoder.rad;
 	mecanumPosition.w2 = CM2Encoder.rad;
 	mecanumPosition.w3 = CM3Encoder.rad;
 	mecanumPosition.w4 = CM4Encoder.rad;
+	*/
+	mecanumPosition.w1 = CM1Encoder.round;
+	mecanumPosition.w2 = CM2Encoder.round;
+	mecanumPosition.w3 = CM3Encoder.round;
+	mecanumPosition.w4 = CM4Encoder.round;
+	
+	
 	
 #if USE_Mecanum_Synthesis
 	
@@ -180,11 +188,11 @@ void ChassisPositionControl(void)
 		
 		
 		printf("chassisPositionTarget:\n");
-		Mecanum_Debug(&chassisSpeedTarget);
+		Mecanum_Debug(&chassisPositionTarget);
 		printf("mecanumPosition:\n");
-		Mecanum_Debug(&mecanumSpeed);
+		Mecanum_Debug(&mecanumPosition);
 		printf("chassisSpeedTarget:\n");
-		Mecanum_Debug(&mecanumCurrent);
+		Mecanum_Debug(&chassisSpeedTarget);
 		
 	}
 #endif	
@@ -261,7 +269,20 @@ void ChassisSpeedControl(void)
 		Mecanum_Debug(&mecanumSpeed);
 		printf("mecanumCurrent:\n");
 		Mecanum_Debug(&mecanumCurrent);
-
+		
+		/*
+		printf("CM1Encoder:\n");
+		Encoder_Debug(&CM1Encoder);
+		printf("CM2Encoder:\n");
+		Encoder_Debug(&CM2Encoder);
+		printf("CM3Encoder:\n");
+		Encoder_Debug(&CM3Encoder);
+		printf("CM4Encoder:\n");
+		Encoder_Debug(&CM4Encoder);
+		*/
+		printf("CM3Encoder:\n");
+		Encoder_Debug(&CM3Encoder);
+		
 	}
 #endif	
 	
