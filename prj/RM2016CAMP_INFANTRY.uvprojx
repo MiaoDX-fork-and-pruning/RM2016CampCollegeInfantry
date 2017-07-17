@@ -608,6 +608,26 @@
               <FileType>1</FileType>
               <FilePath>..\bsp\zgyro.c</FilePath>
             </File>
+            <File>
+              <FileName>nvic.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\bsp\nvic.c</FilePath>
+            </File>
+            <File>
+              <FileName>nvic.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\bsp\nvic.h</FilePath>
+            </File>
+            <File>
+              <FileName>sdbus.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\bsp\sdbus.c</FilePath>
+            </File>
+            <File>
+              <FileName>sdbus.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\bsp\sdbus.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
