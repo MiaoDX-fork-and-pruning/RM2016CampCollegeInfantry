@@ -44,10 +44,12 @@ typedef struct PID
 	float kd_offset;
 	void (*Calc)(struct PID *pid);
 	void (*Reset)(struct PID *pid);
+	void (*SetPID)(float p, float i, float d);
 }PID;
 
 void PID_Reset(PID *pid);
 void PID_Calc(PID *pid);
+void PID_Set(PID *pid, float p, float i, float d);
 
 #define PID_CREATE(KP,KI,KD,PM,IM,DM,OM) \
 {\

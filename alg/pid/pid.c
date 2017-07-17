@@ -41,3 +41,9 @@ void PID_Calc(PID *pid)
 	pid->err[0] = pid->err[1]; // err fifo
 }
 
+void PID_Set(struct PID *pid, float p, float i, float d)
+{
+	pid->kp = p;
+	pid->ki = i;
+	pid->kd = d;
+}
