@@ -15,6 +15,7 @@
  */
  
 #include "main.h"
+#include "sdbus.h"
 
 InputMode inputMode = INPUT_MODE_NO;
 InputMode lastInputMode = INPUT_MODE_NO;
@@ -199,17 +200,16 @@ void RAMP_CALC_Mecanum(Mecanum* mecanumVar)
 void GetStickCtrlChassisPositionProgram(void)
 {
 	
-	float targetX = 1100, targetY = 1100, targetZ = 1100;
+	//float targetX = 1100, targetY = 1100, targetZ = 1100;
 	
-	chassisPositionTarget.x = MAP(targetX, CH_MIN, CH_MAX, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX);
-	chassisPositionTarget.y = MAP(targetY, CH_MIN, CH_MAX, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX);
-	chassisPositionTarget.z = MAP(targetZ, CH_MIN, CH_MAX, -INPUT_GIMBALS_POSITION_MAX, INPUT_GIMBALS_POSITION_MAX);
+	chassisPositionTarget.x = MAP(sdbus.xf+CH_MID, CH_MIN, CH_MAX, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX);
+	chassisPositionTarget.y = MAP(sdbus.xtr+CH_MID, CH_MIN, CH_MAX, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX);
+	chassisPositionTarget.z = MAP(sdbus.xrr+CH_MID, CH_MIN, CH_MAX, -INPUT_GIMBALS_POSITION_MAX, INPUT_GIMBALS_POSITION_MAX);
 	
 	// BEFORE USING RAMP, WE SHOULD RESET IT!!!
+	// RAMP_CALC_Mecanum(&chassisPositionTarget);
 	
-	RAMP_CALC_Mecanum(&chassisPositionTarget);
-	
-	// Mecanum_Decompose(&chassisPositionTarget); // Decompose to four wheels
+	Mecanum_Decompose(&chassisPositionTarget); // Decompose to four wheels
 }
 
 
@@ -219,23 +219,24 @@ void GetStickCtrlChassisPosition(void)
 	//printf("<P:\n");
 	chassisPositionTarget.x = MAP(dbus.rc.ch0, CH_MIN, CH_MAX, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX);
 	chassisPositionTarget.y = MAP(dbus.rc.ch1, CH_MIN, CH_MAX, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX);
+	//chassisPositionTarget.y = MAP(CH_MAX, CH_MIN, CH_MAX, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX);
 	chassisPositionTarget.z = MAP(dbus.rc.ch2, CH_MIN, CH_MAX, -INPUT_GIMBALS_POSITION_MAX, INPUT_GIMBALS_POSITION_MAX);
 	
-	MAF_CALC_Mecanum(&chassisPositionTarget);
+	//MAF_CALC_Mecanum(&chassisPositionTarget);
 	
 	//printf(":P>\n");
-	// Mecanum_Decompose(&chassisPositionTarget); // Decompose to four wheels
+	Mecanum_Decompose(&chassisPositionTarget); // Decompose to four wheels
 }
 
 void GetStickCtrlChassisSpeed(void)
 {
-	chassisSpeedTarget.x = MAP(dbus.rc.ch0, CH_MIN, CH_MAX, -INPUT_CHASSIS_SPEED_MAX, INPUT_CHASSIS_SPEED_MAX);
+	chassisSpeedTarget.x = MAP(dbus.rc.ch0, CH_MIN, CH_MAX, -INPUT_CHASSIS_SPEED_MAX, INPUT_CHASSIS_SPEED_MAX);	
 	chassisSpeedTarget.y = MAP(dbus.rc.ch1, CH_MIN, CH_MAX, -INPUT_CHASSIS_SPEED_MAX, INPUT_CHASSIS_SPEED_MAX);
 	chassisSpeedTarget.z = MAP(dbus.rc.ch2, CH_MIN, CH_MAX, -INPUT_GIMBALS_SPEED_MAX, INPUT_GIMBALS_SPEED_MAX);
 	
 	// MAF_CALC_Mecanum(&chassisSpeedTarget);
 	
-	// Mecanum_Decompose(&chassisSpeedTarget); // Decompose to four wheels
+	Mecanum_Decompose(&chassisSpeedTarget); // Decompose to four wheels
 }
 
 void GetStickCtrlChassisCurrent(void)

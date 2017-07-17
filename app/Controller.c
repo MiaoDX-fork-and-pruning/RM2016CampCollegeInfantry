@@ -18,7 +18,7 @@
 
 #define USE_Mecanum_Synthesis 0
 #define ControllerDEBUG	1
-#define ControllerDEBUGNUM 1000
+#define ControllerDEBUGNUM 2000
 uint32_t debug_tick = 0;
 /*
 #if ControllerDEBUG
@@ -153,8 +153,6 @@ void ChassisPositionControl(void)
 
 #else
 	
-	Mecanum_Decompose(&chassisPositionTarget); // Decompose to four wheels
-	
 	chassisPositionPid1.ref = chassisPositionTarget.w1;
 	chassisPositionPid2.ref = chassisPositionTarget.w2;
 	chassisPositionPid3.ref = chassisPositionTarget.w3;
@@ -179,13 +177,30 @@ void ChassisPositionControl(void)
 
 
 #if ControllerDEBUG	
+
+/*
+	if(debug_tick%20 == 0){
+		if(abs(chassisPositionTarget.w3 - mecanumPosition.w3) > 5.0){
+			printf("Target:%f,Present:%f\n", chassisPositionTarget.w3, mecanumPosition.w3);
+		}
+	}
+*/
+
+
+
 	if(debug_tick%ControllerDEBUGNUM == 0){
+		
+		/*
 		#if USE_Mecanum_Synthesis // NOTE the dec or syn
 			Mecanum_Decompose(&chassisSpeedTarget);
 		#else
 			Mecanum_Synthesis(&chassisSpeedTarget);
 		#endif
+		*/
 		
+		if(abs(chassisPositionTarget.w3 - mecanumPosition.w3) > 2.0){
+			printf("Target:%f,Present:%f\n", chassisPositionTarget.w3, mecanumPosition.w3);
+		}
 		
 		printf("chassisPositionTarget:\n");
 		Mecanum_Debug(&chassisPositionTarget);
@@ -230,8 +245,6 @@ void ChassisSpeedControl(void)
 	
 #else
 	
-	Mecanum_Decompose(&chassisSpeedTarget); // Decompose to four wheels
-	
 	chassisSpeedPid1.ref = chassisSpeedTarget.w1;
 	chassisSpeedPid2.ref = chassisSpeedTarget.w2;
 	chassisSpeedPid3.ref = chassisSpeedTarget.w3;
@@ -256,19 +269,32 @@ void ChassisSpeedControl(void)
 
 
 #if ControllerDEBUG	
+
+/*
+	if(debug_tick%80 == 0){
+		if(abs(chassisSpeedTarget.w3 - mecanumSpeed.w3) > 1.0){
+			printf("Target:%f,Present:%f\n", chassisSpeedTarget.w3, mecanumSpeed.w3);
+		}
+	}
+*/
 	if(debug_tick%ControllerDEBUGNUM == 0){
+		
+		/*
 		#if USE_Mecanum_Synthesis // NOTE the dec or syn
 			Mecanum_Decompose(&mecanumCurrent);
 		#else
 			Mecanum_Synthesis(&mecanumCurrent);
 		#endif
-
+		*/		
+		
+		/*
 		printf("chassisSpeedTarget:\n");
 		Mecanum_Debug(&chassisSpeedTarget);
 		printf("mecanumSpeed:\n");
 		Mecanum_Debug(&mecanumSpeed);
 		printf("mecanumCurrent:\n");
 		Mecanum_Debug(&mecanumCurrent);
+		*/
 		
 		/*
 		printf("CM1Encoder:\n");
@@ -360,11 +386,21 @@ void PID_ResetAll(void)
 	PID_Reset(&gimbalsPositionYawPID);
 	PID_Reset(&gimbalsPositionPitchPID);
 	
+	PID_Reset(&chassisPositionPid1);
+	PID_Reset(&chassisPositionPid2);
+	PID_Reset(&chassisPositionPid3);
+	PID_Reset(&chassisPositionPid4);
+	
 	PID_Reset(&chassisSpeedXPid);
 	PID_Reset(&chassisSpeedYPid);
 	PID_Reset(&chassisSpeedZPid);
 	PID_Reset(&gimbalsSpeedYawPID);
 	PID_Reset(&gimbalsSpeedPitchPID);
+	
+	PID_Reset(&chassisSpeedPid1);
+	PID_Reset(&chassisSpeedPid2);
+	PID_Reset(&chassisSpeedPid3);
+	PID_Reset(&chassisSpeedPid4);
 }
 
 void Encoder_ResetAll(void)
@@ -425,7 +461,7 @@ void ControlTask(void)
 		}
 
 #if ControllerDEBUG		
-		if(ms_tick % 420 == 0)
+		if(ms_tick % 4200 == 0)
 		{
 			printf("ctrlMode:%d\n", ctrlMode);
 		}

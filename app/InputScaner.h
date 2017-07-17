@@ -19,7 +19,7 @@
 
 #include <stdint.h>
 
-#define INPUT_CHASSIS_POSITION_MAX 400.0f     //max position: 4m
+#define INPUT_CHASSIS_POSITION_MAX 100.0f     //max position: 4m
 #define INPUT_CHASSIS_SPEED_MAX    20.0f        //max speed:    20m/s
 #define INPUT_CHASSIS_CURRENT_MAX  400.0f      //max current:  4A
 
