@@ -19,14 +19,16 @@
 
 #include <stdint.h>
 
-#define USART3_TX_FIFO_SIZE 256u
-
+#define USART_REC_LEN 12
+//extern unsigned char USART_RX_BUF[USART_REC_LEN];
 void USART3_Config(void);
 
-void USART3_Print(uint8_t ch);
-void USART3_PrintString(const char* str);
-void USART3_PrintBlock(uint8_t* pdata, uint8_t len);
+#define USART3_Channel USART3_IRQn
+#define USART3_PreemptionPriority 3
+#define USART3_SubPriority 3
 
-extern uint8_t usart3_rx_data;
+#define DMA1_Channel DMA1_Stream1_IRQn
+#define DMA1_PreemptionPriority 0
+#define DMA1_SubPriority 2
 
 #endif

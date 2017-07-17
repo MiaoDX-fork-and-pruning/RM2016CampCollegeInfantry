@@ -31,7 +31,7 @@ void OdomTask(void)
 	odom.vz = mecanumSpeed.z * 1000;
 	
 	CRC16Append((uint8_t*)&odom, sizeof(Odom), ODOM_INIT_CRC16);
-	USART3_PrintBlock((uint8_t*)&odom, sizeof(Odom));
+	//USART3_PrintBlock((uint8_t*)&odom, sizeof(Odom));
 	
 }
 
