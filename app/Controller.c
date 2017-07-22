@@ -217,8 +217,12 @@ void ChassisPositionControl(void)
 		Mecanum_Debug(&chassisPositionTarget);
 		printf("mecanumPosition:\n");
 		Mecanum_Debug(&mecanumPosition);
-		printf("chassisSpeedTarget:\n");
-		Mecanum_Debug(&chassisSpeedTarget);
+		//printf("chassisSpeedTarget:\n");
+		//Mecanum_Debug(&chassisSpeedTarget);
+		
+		printf("CM3PID:\n");
+		printf("P:%f,\tI:%f,\tD:%f,\tOUT:%f\n", chassisPositionPid3.componentKp,chassisPositionPid3.componentKi, chassisPositionPid3.componentKd, chassisPositionPid3.output);
+		
 		
 	}
 #endif	
@@ -319,6 +323,7 @@ void ChassisSpeedControl(void)
 		*/
 		printf("CM3Encoder:\n");
 		Encoder_Debug(&CM3Encoder);
+
 		
 	}
 #endif	
@@ -530,11 +535,11 @@ void ControlTask(void)
 					ChassisPositionControl();
 					ChassisSpeedControl();
 					ChassisCurrentControl();
-					GimbalsPositionControl();
-					GimbalsSpeedControl();
-					GimbalsCurrentControl();
+					//GimbalsPositionControl();
+					//GimbalsSpeedControl();
+					//GimbalsCurrentControl();
 					ChassisMotorCurrentTransmit();
-					GimbalsMotorCurrentTransmit();
+					//GimbalsMotorCurrentTransmit();
 				}
 				else{
 					SetCMCurrent(CAN1, 0, 0, 0, 0);

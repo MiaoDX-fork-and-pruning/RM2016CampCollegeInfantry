@@ -221,7 +221,7 @@ void RAMP_CALC_Mecanum(Mecanum* mecanumVar)
 
 int SIMLIAR(float x, float y)
 {
-	return abs(x-y) < 10.0; // this can vary according to our precision
+	return abs(x-y) < 5.0; // this can vary according to our precision
 }
 
 static uint32_t mg_tick = 0;
@@ -239,7 +239,7 @@ void MoveGuard()
 		mg_tick = 0;
 	}
 	
-	if(mg_tick >= 2000){
+	if(mg_tick >= 4200){
 		
 		printf("Going to stop!\n");
 		printf("chassisPositionTarget:\n");
@@ -270,11 +270,9 @@ void GetStickCtrlChassisPositionProgram(void)
 		printf("Controller_Reset done!\n");
 #endif
 		
-		Mecanum_Synthesis(&mecanumPosition);
-		
-		chassisPositionTarget.x = mecanumPosition.x + MAP(sdbus.xf, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX);
-		chassisPositionTarget.y = mecanumPosition.y + MAP(sdbus.xtr, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX);		
-		chassisPositionTarget.z = mecanumPosition.z + MAP(sdbus.xrr, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX);
+		chassisPositionTarget.x = MAP(sdbus.xf, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX);
+		chassisPositionTarget.y = MAP(sdbus.xtr, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX);		
+		chassisPositionTarget.z = MAP(sdbus.xrr, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX);
 		//chassisPositionTarget.z = mecanumPosition.z + MAP(sdbus.xrr+CH_MID, CH_MIN, CH_MAX, -INPUT_GIMBALS_POSITION_MAX, INPUT_GIMBALS_POSITION_MAX)*81.92;
 		
 		

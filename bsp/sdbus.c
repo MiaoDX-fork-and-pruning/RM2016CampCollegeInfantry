@@ -77,9 +77,15 @@ void SPID_Dec(SPID* spid,const unsigned char* sdbuf)
 
 void SPID_POS_Dec(SPID* spid,const unsigned char* sdbuf)
 {
+	
+	
+			//+040+020+040
+	
+			//+000+470+000
+	
 	spid->kp = (float)( (','-sdbuf[0])*((sdbuf[1]-'0')*100+(sdbuf[2]-'0')*10+(sdbuf[3]-'0'))*0.01 );
-	spid->ki = (float)( (','-sdbuf[4])*((sdbuf[5]-'0')*100+(sdbuf[6]-'0')*10+(sdbuf[7]-'0'))*0.001 );
-	spid->kd = (float)( (','-sdbuf[8])*((sdbuf[9]-'0')*100+(sdbuf[10]-'0')*10+(sdbuf[11]-'0'))*0.01 );
+	spid->ki = (float)( (','-sdbuf[4])*((sdbuf[5]-'0')*100+(sdbuf[6]-'0')*10+(sdbuf[7]-'0'))*1e-6 );
+	spid->kd = (float)( (','-sdbuf[8])*((sdbuf[9]-'0')*100+(sdbuf[10]-'0')*10+(sdbuf[11]-'0'))*0.1 );
 		
 	printf("Going to set pids of position:\n");
 	

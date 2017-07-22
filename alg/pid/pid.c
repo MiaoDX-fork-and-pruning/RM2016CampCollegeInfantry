@@ -30,6 +30,9 @@ void PID_Reset(PID *pid)
 void PID_Calc(PID *pid)
 {
 	pid->err[1] = pid->ref - pid->fdb; // calculate error
+	
+	limit(pid->err[1], -pid->componentKpMax, pid->componentKpMax); // Limit error, we are using componentKpMax here, sorry for that
+	
 	pid->componentKp = (pid->kp + pid->kp_offset) * pid->err[1]; // P
 	limit(pid->componentKp, -pid->componentKpMax, pid->componentKpMax);
 	pid->componentKi+= (pid->ki + pid->ki_offset) * pid->err[1]; // I
