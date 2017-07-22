@@ -92,7 +92,20 @@ void DMA1_Stream1_IRQHandler(void)
         DMA_ClearFlag(DMA1_Stream1, DMA_FLAG_TCIF1);
         DMA_ClearITPendingBit(DMA1_Stream1, DMA_IT_TCIF1);
 				
-				SDBUS_Dec(&sdbus,USART_RX_BUF);	
+			//+001+000+010
+			//+000+047+000
+			switch(dbus.rc.s1){
+				case SW_MD:
+				{
+					SPID_POS_Dec(&spid, USART_RX_BUF);
+				}break;
+				case SW_DN:
+				{
+					SDBUS_Dec(&sdbus,USART_RX_BUF);	
+				}break;
+			}
+			
+				//SDBUS_Dec(&sdbus,USART_RX_BUF);	
 				//SPID_Dec(&spid, USART_RX_BUF);
 				//SPID_POS_Dec(&spid, USART_RX_BUF);
 				

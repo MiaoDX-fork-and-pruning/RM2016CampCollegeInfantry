@@ -120,7 +120,9 @@ void WorkingStateSM(void)
 void ChassisPositionControl(void)
 {
 	/* Mecanum Position Synthesis */
+
 	/*
+
 	mecanumPosition.w1 = CM1Encoder.rad;
 	mecanumPosition.w2 = CM2Encoder.rad;
 	mecanumPosition.w3 = CM3Encoder.rad;
@@ -129,12 +131,15 @@ void ChassisPositionControl(void)
 	mecanumPosition.w1 = CM1Encoder.round;
 	mecanumPosition.w2 = CM2Encoder.round;
 	mecanumPosition.w3 = CM3Encoder.round;
-	mecanumPosition.w4 = CM4Encoder.round;
+	mecanumPosition.w4 = CM4Encoder.round;	
+	
 	*/
-	mecanumPosition.w1 = CM1Encoder.angle/10;
-	mecanumPosition.w2 = CM2Encoder.angle/10;
-	mecanumPosition.w3 = CM3Encoder.angle/10;
-	mecanumPosition.w4 = CM4Encoder.angle/10;
+	mecanumPosition.w1 = CM1Encoder.angle/5.0;
+	mecanumPosition.w2 = CM2Encoder.angle/5.0;
+	mecanumPosition.w3 = CM3Encoder.angle/5.0;
+	mecanumPosition.w4 = CM4Encoder.angle/5.0;
+	
+	
 	
 	
 #if USE_Mecanum_Synthesis

@@ -231,7 +231,7 @@ void MoveGuard()
 	//if(SIMLIAR(chassisPositionTarget.w1, mecanumPosition.w1) && SIMLIAR(chassisPositionTarget.w2, mecanumPosition.w2) && SIMLIAR(chassisPositionTarget.w3, mecanumPosition.w3) && SIMLIAR(chassisPositionTarget.w4, mecanumPosition.w4)){
 	if(SIMLIAR(chassisPositionTarget.w3, mecanumPosition.w3) && SIMLIAR(chassisPositionTarget.w4, mecanumPosition.w4)){
 		mg_tick ++;
-		if(mg_tick%200 == 0){
+		if(mg_tick%1000 == 0){
 			printf("SIMLIAR %d times!!\n", mg_tick);
 		}
 	}
@@ -239,7 +239,7 @@ void MoveGuard()
 		mg_tick = 0;
 	}
 	
-	if(mg_tick >= 1000){
+	if(mg_tick >= 2000){
 		
 		printf("Going to stop!\n");
 		printf("chassisPositionTarget:\n");
@@ -263,7 +263,7 @@ void MoveGuard()
 void GetStickCtrlChassisPositionProgram(void)
 {	
 	
-	if(abs(sdbus.xf) > 1e-8 || abs(sdbus.xtr) > 1e-8 || abs(sdbus.xrr) > 1e-8){
+	if(fabs(sdbus.xf) > 1e-8 || fabs(sdbus.xtr) > 1e-8 || fabs(sdbus.xrr) > 1e-8){
 		
 #if MOVE_RESET
 		Controller_Reset();
@@ -272,15 +272,15 @@ void GetStickCtrlChassisPositionProgram(void)
 		
 		Mecanum_Synthesis(&mecanumPosition);
 		
-		chassisPositionTarget.x = mecanumPosition.x + MAP(sdbus.xf, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX)*360/10;
-		chassisPositionTarget.y = mecanumPosition.y + MAP(sdbus.xtr, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX)*360/10;		
-		chassisPositionTarget.z = mecanumPosition.z + MAP(sdbus.xrr, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX)*360/10;
+		chassisPositionTarget.x = mecanumPosition.x + MAP(sdbus.xf, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX);
+		chassisPositionTarget.y = mecanumPosition.y + MAP(sdbus.xtr, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX);		
+		chassisPositionTarget.z = mecanumPosition.z + MAP(sdbus.xrr, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX);
 		//chassisPositionTarget.z = mecanumPosition.z + MAP(sdbus.xrr+CH_MID, CH_MIN, CH_MAX, -INPUT_GIMBALS_POSITION_MAX, INPUT_GIMBALS_POSITION_MAX)*81.92;
 		
-
-		chassisPositionTarget.x *= MECANUM_R;
-		chassisPositionTarget.y *= MECANUM_R;
-		chassisPositionTarget.z *= MECANUM_R;
+		
+		chassisPositionTarget.x *= (180.0/PI/5.0);
+		chassisPositionTarget.y *= (180.0/PI/5.0);
+		chassisPositionTarget.z *= (180.0/PI/5.0);
 		
 		
 		SDBUS_Reset(&sdbus);
@@ -288,8 +288,7 @@ void GetStickCtrlChassisPositionProgram(void)
 		mg_tick = 0;
 		MOVE_FLAG = 1;
 		
-		Mecanum_Decompose(&chassisPositionTarget); // Decompose to four wheels
-		
+		Mecanum_Decompose(&chassisPositionTarget); // Decompose to four wheels		
 		
 		printf("Going to move\n");
 		printf("chassisPositionTarget:\n");
@@ -322,6 +321,7 @@ void GetStickCtrlChassisPosition(void)
 	chassisPositionTarget.z = MAP(dbus.rc.ch2, CH_MIN, CH_MAX, -INPUT_GIMBALS_POSITION_MAX, INPUT_GIMBALS_POSITION_MAX);
 	
 	//MAF_CALC_Mecanum(&chassisPositionTarget);
+	
 	
 	//printf(":P>\n");
 	Mecanum_Decompose(&chassisPositionTarget); // Decompose to four wheels

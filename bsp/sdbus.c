@@ -28,10 +28,21 @@ void SDBUS_Enc(const SDBUS* sdbus,unsigned char* sdbuf)//sdbus±àÂë
 
 void SDBUS_Dec(SDBUS* sdbus,const unsigned char* sdbuf)//sdbus½âÂë
 {
-		sdbus->xf = (double)( (','-sdbuf[0])*((sdbuf[1]-'0')*100+(sdbuf[2]-'0')*10+(sdbuf[3]-'0')) );
-		sdbus->xtr = (double)( (','-sdbuf[4])*((sdbuf[5]-'0')*100+(sdbuf[6]-'0')*10+(sdbuf[7]-'0')) );
-		sdbus->xrr = (double)( (','-sdbuf[8])*((sdbuf[9]-'0')*100+(sdbuf[10]-'0')*10+(sdbuf[11]-'0')) );
+		sdbus->xf = (double)( (','-sdbuf[0])*((sdbuf[1]-'0')*100+(sdbuf[2]-'0')*10+(sdbuf[3]-'0'))*0.01 );
+		sdbus->xtr = (double)( (','-sdbuf[4])*((sdbuf[5]-'0')*100+(sdbuf[6]-'0')*10+(sdbuf[7]-'0'))*0.01 );
+		sdbus->xrr = (double)( (','-sdbuf[8])*((sdbuf[9]-'0')*100+(sdbuf[10]-'0')*10+(sdbuf[11]-'0'))*0.01 );
 		
+	
+	printf("GOT:%f,%f,%f\n", sdbus->xf, sdbus->xtr, sdbus->xrr);
+	
+		sdbus->xf *= 27;
+		sdbus->xtr *= 27;
+		sdbus->xrr *= 27;
+	
+	
+	
+	
+	
 		/*
 		sdbus->w1 = RM3510_1.thisPosition+sdbus->xf+sdbus->xtr+sdbus->xrr;
 		sdbus->w2 = -RM3510_2.thisPosition+sdbus->xf-sdbus->xtr-sdbus->xrr;
@@ -39,7 +50,7 @@ void SDBUS_Dec(SDBUS* sdbus,const unsigned char* sdbuf)//sdbus½âÂë
 		sdbus->w4 = -RM3510_4.thisPosition+sdbus->xf+sdbus->xtr-sdbus->xrr;
 		*/
 		
-		printf("%f,%f,%f", sdbus->xf, sdbus->xtr, sdbus->xrr);
+		printf("CAL:%f,%f,%f\n", sdbus->xf, sdbus->xtr, sdbus->xrr);
 }
 
 void SPID_Dec(SPID* spid,const unsigned char* sdbuf)
@@ -67,7 +78,7 @@ void SPID_Dec(SPID* spid,const unsigned char* sdbuf)
 void SPID_POS_Dec(SPID* spid,const unsigned char* sdbuf)
 {
 	spid->kp = (float)( (','-sdbuf[0])*((sdbuf[1]-'0')*100+(sdbuf[2]-'0')*10+(sdbuf[3]-'0'))*0.01 );
-	spid->ki = (float)( (','-sdbuf[4])*((sdbuf[5]-'0')*100+(sdbuf[6]-'0')*10+(sdbuf[7]-'0'))*0.0001 );
+	spid->ki = (float)( (','-sdbuf[4])*((sdbuf[5]-'0')*100+(sdbuf[6]-'0')*10+(sdbuf[7]-'0'))*0.001 );
 	spid->kd = (float)( (','-sdbuf[8])*((sdbuf[9]-'0')*100+(sdbuf[10]-'0')*10+(sdbuf[11]-'0'))*0.01 );
 		
 	printf("Going to set pids of position:\n");
