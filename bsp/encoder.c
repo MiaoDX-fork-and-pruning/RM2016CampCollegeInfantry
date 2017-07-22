@@ -104,6 +104,7 @@ void Encoder_Debug(Encoder* encoder)
 	printf("angle:%f\t", encoder->angle);
 	printf("rate:%d\t", encoder->rate);
 	printf("rad_rate:%f\t", encoder->rad_rate);
+	printf("rad:%f\t", encoder->rad);
 	printf("cnt:%d\n", encoder->cnt);
 
 }

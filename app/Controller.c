@@ -15,10 +15,12 @@
  */
  
 #include "main.h"
+#include "InputScaner.h"
 
 #define USE_Mecanum_Synthesis 0
 #define ControllerDEBUG	1
-#define ControllerDEBUGNUM 2000
+#define ControllerDEBUGNUM 4200
+uint32_t ms_tick = 0;
 uint32_t debug_tick = 0;
 /*
 #if ControllerDEBUG
@@ -123,12 +125,16 @@ void ChassisPositionControl(void)
 	mecanumPosition.w2 = CM2Encoder.rad;
 	mecanumPosition.w3 = CM3Encoder.rad;
 	mecanumPosition.w4 = CM4Encoder.rad;
-	*/
+	
 	mecanumPosition.w1 = CM1Encoder.round;
 	mecanumPosition.w2 = CM2Encoder.round;
 	mecanumPosition.w3 = CM3Encoder.round;
 	mecanumPosition.w4 = CM4Encoder.round;
-	
+	*/
+	mecanumPosition.w1 = CM1Encoder.angle/10;
+	mecanumPosition.w2 = CM2Encoder.angle/10;
+	mecanumPosition.w3 = CM3Encoder.angle/10;
+	mecanumPosition.w4 = CM4Encoder.angle/10;
 	
 	
 #if USE_Mecanum_Synthesis
@@ -419,11 +425,25 @@ void Ramp_ResetAll(void)
 	Ramp_ResetCounter(&gimbalsRamp);
 }
 
+void Mecanum_ResetAll(void)
+{
+	Mecanum_Reset(&mecanumPosition);
+	Mecanum_Reset(&mecanumSpeed);
+	Mecanum_Reset(&mecanumCurrent);
+	
+	Mecanum_Reset(&chassisPositionTarget);
+	Mecanum_Reset(&chassisSpeedTarget);	
+}
+
 void Controller_Reset(void)
 {
 	Encoder_ResetAll();
 	Ramp_ResetAll();
 	PID_ResetAll();
+	Mecanum_ResetAll();
+
+	ms_tick = 0;		
+	debug_tick = 0;
 }
 
 void ChassisMotorCurrentTransmit(void)
@@ -436,18 +456,19 @@ void GimbalsMotorCurrentTransmit(void)
 	//SetGMCurrent(CAN1, gimbalsMotorCurrent.yaw, gimbalsMotorCurrent.pit);
 }
 
-static uint32_t ms_tick = 0;
+
 void ControlTask(void)
 {
 	ms_tick++;
 	debug_tick++;
 	
+	InputTask(); // dbus
+	
 	WorkingStateSM();
 	if(lastWorkingState == WORKING_STATE_STOP && workingState == WORKING_STATE_PREPARE)
 	{
 		printf("Going to reset the variables and prepare\n\n");
-		ms_tick = 0;		
-		debug_tick = 0;
+		
 		Controller_Reset();
 	}
 	else if(workingState == WORKING_STATE_NORMAL)
@@ -455,6 +476,7 @@ void ControlTask(void)
 		//printf("run");
 		if(lastCtrlMode != ctrlMode)
 		{
+			ms_tick = 0;		
 			debug_tick = 0;
 			//Ramp_ResetAll();
 			//PID_ResetAll();
@@ -498,7 +520,7 @@ void ControlTask(void)
 			}break;
 			case CTRL_MODE_PROGRAM: // Set position by program
 			{
-				if(ms_tick % 4 == 0)
+				if(ms_tick % 4 == 0 && MOVE_FLAG == 1)
 				{
 					ChassisPositionControl();
 					ChassisSpeedControl();
@@ -508,6 +530,11 @@ void ControlTask(void)
 					GimbalsCurrentControl();
 					ChassisMotorCurrentTransmit();
 					GimbalsMotorCurrentTransmit();
+				}
+				else{
+					SetCMCurrent(CAN1, 0, 0, 0, 0);
+					ChassisPositionControl(); // Just to look at present values
+					ChassisSpeedControl();
 				}
 			}break;
 			/*

@@ -9,6 +9,7 @@ No   Version    Date     Revised By       Item       Description
 1     1.6       7/8        yf   			    sdbus       ±àÂë½âÂë	   
 ************************************************************************************/
 #include "sdbus.h"
+#include "Controller.h"
 #include "main.h"
 
 
@@ -44,7 +45,7 @@ void SDBUS_Dec(SDBUS* sdbus,const unsigned char* sdbuf)//sdbus½âÂë
 void SPID_Dec(SPID* spid,const unsigned char* sdbuf)
 {
 	spid->kp = (float)( (','-sdbuf[0])*((sdbuf[1]-'0')*100+(sdbuf[2]-'0')*10+(sdbuf[3]-'0')) );
-	spid->ki = (float)( (','-sdbuf[4])*((sdbuf[5]-'0')*100+(sdbuf[6]-'0')*10+(sdbuf[7]-'0'))*0.01 );
+	spid->ki = (float)( (','-sdbuf[4])*((sdbuf[5]-'0')*100+(sdbuf[6]-'0')*10+(sdbuf[7]-'0'))*0.1 );
 	spid->kd = (float)( (','-sdbuf[8])*((sdbuf[9]-'0')*100+(sdbuf[10]-'0')*10+(sdbuf[11]-'0'))*0.1 );
 		
 	printf("Going to set pids of speed:\n");
@@ -65,9 +66,9 @@ void SPID_Dec(SPID* spid,const unsigned char* sdbuf)
 
 void SPID_POS_Dec(SPID* spid,const unsigned char* sdbuf)
 {
-	spid->kp = (float)( (','-sdbuf[0])*((sdbuf[1]-'0')*100+(sdbuf[2]-'0')*10+(sdbuf[3]-'0'))*0.1 );
-	spid->ki = (float)( (','-sdbuf[4])*((sdbuf[5]-'0')*100+(sdbuf[6]-'0')*10+(sdbuf[7]-'0'))*0.001 );
-	spid->kd = (float)( (','-sdbuf[8])*((sdbuf[9]-'0')*100+(sdbuf[10]-'0')*10+(sdbuf[11]-'0'))*0.1 );
+	spid->kp = (float)( (','-sdbuf[0])*((sdbuf[1]-'0')*100+(sdbuf[2]-'0')*10+(sdbuf[3]-'0'))*0.01 );
+	spid->ki = (float)( (','-sdbuf[4])*((sdbuf[5]-'0')*100+(sdbuf[6]-'0')*10+(sdbuf[7]-'0'))*0.0001 );
+	spid->kd = (float)( (','-sdbuf[8])*((sdbuf[9]-'0')*100+(sdbuf[10]-'0')*10+(sdbuf[11]-'0'))*0.01 );
 		
 	printf("Going to set pids of position:\n");
 	
@@ -80,6 +81,10 @@ void SPID_POS_Dec(SPID* spid,const unsigned char* sdbuf)
 	
 	
 	printf("Set pids of position done:\n");
+	
+	PID_ResetAll();
+	
+	printf("PID_ResetAll done:\n");
 	
 	printf("chassisPositionPid1 PID:%f,%f,%f\n", chassisPositionPid1.kp, chassisPositionPid1.ki, chassisPositionPid1.kd);
 	

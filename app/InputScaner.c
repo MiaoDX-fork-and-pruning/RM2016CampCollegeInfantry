@@ -49,6 +49,11 @@ MAFilterF32* mafilter_z_m = NULL;
 Ramp chassisRampPOS = CHASSIS_RAMP_LONGER;
 #define InputScannerDEBUG 0
 
+#define PROGRAM_MODE 1 // shoule be consistent with mecanum.h
+#define MOVE_RESET 1 // reset before move, relative move without memory
+
+
+
 void GetInputMode(void)
 {
 	lastInputMode = inputMode;
@@ -71,6 +76,14 @@ void GetInputMode(void)
 			inputMode = INPUT_MODE_NO;
 		}break;
 	}
+
+if(inputMode == INPUT_MODE_NO){
+#if PROGRAM_MODE
+inputMode = INPUT_MODE_PROGRAM;
+#endif	
+}	
+
+	
 }
 
 void GetCtrlMode(void)
@@ -92,9 +105,16 @@ void GetCtrlMode(void)
 		}break;
 		default:
 		{
-			ctrlMode = CTRL_MODE_SPEED;
+			ctrlMode = CTRL_MODE_NO;
 		}break;
 	}
+
+if(ctrlMode == CTRL_MODE_NO){
+#if PROGRAM_MODE
+ctrlMode = CTRL_MODE_PROGRAM;
+#endif		
+}	
+	
 }
 
 void GetSwitchState(SwitchState* s, uint8_t v)
@@ -197,19 +217,98 @@ void RAMP_CALC_Mecanum(Mecanum* mecanumVar)
 #endif	
 }
 
-void GetStickCtrlChassisPositionProgram(void)
+
+
+int SIMLIAR(float x, float y)
 {
+	return abs(x-y) < 10.0; // this can vary according to our precision
+}
+
+static uint32_t mg_tick = 0;
+uint32_t MOVE_FLAG = 0;
+void MoveGuard()
+{
+	//if(SIMLIAR(chassisPositionTarget.w1, mecanumPosition.w1) && SIMLIAR(chassisPositionTarget.w2, mecanumPosition.w2) && SIMLIAR(chassisPositionTarget.w3, mecanumPosition.w3) && SIMLIAR(chassisPositionTarget.w4, mecanumPosition.w4)){
+	if(SIMLIAR(chassisPositionTarget.w3, mecanumPosition.w3) && SIMLIAR(chassisPositionTarget.w4, mecanumPosition.w4)){
+		mg_tick ++;
+		if(mg_tick%200 == 0){
+			printf("SIMLIAR %d times!!\n", mg_tick);
+		}
+	}
+	else{
+		mg_tick = 0;
+	}
 	
-	//float targetX = 1100, targetY = 1100, targetZ = 1100;
+	if(mg_tick >= 1000){
+		
+		printf("Going to stop!\n");
+		printf("chassisPositionTarget:\n");
+		Mecanum_Debug(&chassisPositionTarget);
+		
+		printf("mecanumPosition:\n");
+		Mecanum_Debug(&mecanumPosition);
+		
+		
+		MOVE_FLAG = 0;
+		
+#if MOVE_RESET
+		Controller_Reset();
+		printf("Controller_Reset done!\n");
+#endif
+
+	}
+}
+
+
+void GetStickCtrlChassisPositionProgram(void)
+{	
 	
-	chassisPositionTarget.x = MAP(sdbus.xf+CH_MID, CH_MIN, CH_MAX, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX);
-	chassisPositionTarget.y = MAP(sdbus.xtr+CH_MID, CH_MIN, CH_MAX, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX);
-	chassisPositionTarget.z = MAP(sdbus.xrr+CH_MID, CH_MIN, CH_MAX, -INPUT_GIMBALS_POSITION_MAX, INPUT_GIMBALS_POSITION_MAX);
+	if(abs(sdbus.xf) > 1e-8 || abs(sdbus.xtr) > 1e-8 || abs(sdbus.xrr) > 1e-8){
+		
+#if MOVE_RESET
+		Controller_Reset();
+		printf("Controller_Reset done!\n");
+#endif
+		
+		Mecanum_Synthesis(&mecanumPosition);
+		
+		chassisPositionTarget.x = mecanumPosition.x + MAP(sdbus.xf, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX)*360/10;
+		chassisPositionTarget.y = mecanumPosition.y + MAP(sdbus.xtr, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX)*360/10;		
+		chassisPositionTarget.z = mecanumPosition.z + MAP(sdbus.xrr, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX)*360/10;
+		//chassisPositionTarget.z = mecanumPosition.z + MAP(sdbus.xrr+CH_MID, CH_MIN, CH_MAX, -INPUT_GIMBALS_POSITION_MAX, INPUT_GIMBALS_POSITION_MAX)*81.92;
+		
+
+		chassisPositionTarget.x *= MECANUM_R;
+		chassisPositionTarget.y *= MECANUM_R;
+		chassisPositionTarget.z *= MECANUM_R;
+		
+		
+		SDBUS_Reset(&sdbus);
+		
+		mg_tick = 0;
+		MOVE_FLAG = 1;
+		
+		Mecanum_Decompose(&chassisPositionTarget); // Decompose to four wheels
+		
+		
+		printf("Going to move\n");
+		printf("chassisPositionTarget:\n");
+		Mecanum_Debug(&chassisPositionTarget);
+		
+		printf("mecanumPosition:\n");
+		Mecanum_Debug(&mecanumPosition);
+		
+	}
 	
-	// BEFORE USING RAMP, WE SHOULD RESET IT!!!
-	// RAMP_CALC_Mecanum(&chassisPositionTarget);
 	
-	Mecanum_Decompose(&chassisPositionTarget); // Decompose to four wheels
+	
+	
+	
+	if(MOVE_FLAG){
+		MoveGuard();
+	}
+	
+	
 }
 
 
@@ -219,13 +318,14 @@ void GetStickCtrlChassisPosition(void)
 	//printf("<P:\n");
 	chassisPositionTarget.x = MAP(dbus.rc.ch0, CH_MIN, CH_MAX, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX);
 	chassisPositionTarget.y = MAP(dbus.rc.ch1, CH_MIN, CH_MAX, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX);
-	//chassisPositionTarget.y = MAP(CH_MAX, CH_MIN, CH_MAX, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX);
+	
 	chassisPositionTarget.z = MAP(dbus.rc.ch2, CH_MIN, CH_MAX, -INPUT_GIMBALS_POSITION_MAX, INPUT_GIMBALS_POSITION_MAX);
 	
 	//MAF_CALC_Mecanum(&chassisPositionTarget);
 	
 	//printf(":P>\n");
 	Mecanum_Decompose(&chassisPositionTarget); // Decompose to four wheels
+	
 }
 
 void GetStickCtrlChassisSpeed(void)
@@ -400,8 +500,6 @@ void InputTask(void)
 			*/
 			default:
 			{
-				GetStickCtrlChassisSpeed();
-				GetStickCtrlGimbalsSpeed();
 			}break;
 		}
 		
@@ -434,6 +532,12 @@ void InputTask(void)
 		}
 		
 	}
+	else if(inputMode == INPUT_MODE_PROGRAM){ // NO RC
+		GetStickCtrlChassisPositionProgram();
+	}
+	
+	
+	
 }
 
 float MAP(float val, float min1, float max1, float min2, float max2)

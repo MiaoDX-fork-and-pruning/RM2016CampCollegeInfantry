@@ -52,5 +52,5 @@ void Mecanum_Synthesis(Mecanum* mecanum);
 void Mecanum_Decompose(Mecanum* mecanum);
 
 void Mecanum_Debug(Mecanum* mecanum);
-
+void Mecanum_Reset(Mecanum* mecanum);
 #endif

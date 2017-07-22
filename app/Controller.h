@@ -21,7 +21,7 @@
 #include "mecanum.h"
 #include "pid.h"
 
-#define CHASSIS_POSITION_PID_DEFAULT PID_CREATE(5.0,0,0.0,300,300,300,300)
+#define CHASSIS_POSITION_PID_DEFAULT PID_CREATE(2,0,0,200,200,200,200)
 #define CHASSIS_SPEED_PID_DEFAULT 	 PID_CREATE(20.0,0.2,4.2,4950,4950,4950,4950)
 #define GIMBALS_POSITION_PID_DEFAULT PID_CREATE(2,0,0,5,0,0,5)
 #define GIMBALS_SPEED_PID_DEFAULT 	 PID_CREATE(300,0,0,4950,0,0,4950)
@@ -53,6 +53,8 @@ typedef struct
 }GimbalsMotorCurrent;
 
 void ControlTask(void);
+void PID_ResetAll(void);
+void Controller_Reset(void);
 
 extern WorkingState workingState;
 extern WorkingState lastWorkingState;

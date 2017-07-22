@@ -115,7 +115,7 @@ void USART1_IRQHandler(void)
 		{
 			//printf("*");
 			DBUS_DEC(&dbus, dbuf);
-			InputTask();
+			//InputTask(); // MOVE it to Controller.c since we want to make the program run without a RC
 		}
 	}       
 }

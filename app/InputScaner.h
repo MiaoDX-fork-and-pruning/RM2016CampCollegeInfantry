@@ -19,12 +19,12 @@
 
 #include <stdint.h>
 
-#define INPUT_CHASSIS_POSITION_MAX 100.0f     //max position: 4m
+#define INPUT_CHASSIS_POSITION_MAX 10000.0f     //max position: 4m
 #define INPUT_CHASSIS_SPEED_MAX    20.0f        //max speed:    20m/s
 #define INPUT_CHASSIS_CURRENT_MAX  400.0f      //max current:  4A
 
-#define INPUT_GIMBALS_POSITION_MAX 3.1415926f     //max position: 4m
-#define INPUT_GIMBALS_SPEED_MAX    3.1415926f        //max speed: 4m/s
+#define INPUT_GIMBALS_POSITION_MAX 314.15926f     //max position: 4m
+#define INPUT_GIMBALS_SPEED_MAX    31.415926f        //max speed: 4m/s
 #define INPUT_GIMBALS_CURRENT_MAX  400.0f      //max current:  4A
 
 #define GET_SWITCH_ACTION(lastState,thisState) (((lastState)<<2)|(thisState))
@@ -59,6 +59,8 @@ typedef enum
 	INPUT_MODE_RC = 0x03,
 	INPUT_MODE_HC = 0x01,
 	INPUT_MODE_NO = 0x02,
+	
+	INPUT_MODE_PROGRAM = 0x03,
 }InputMode;
 
 typedef enum
@@ -66,7 +68,8 @@ typedef enum
 	CTRL_MODE_POSITION = 0x00,
 	CTRL_MODE_SPEED = 0x01,
 	//CTRL_MODE_CURRENT = 0x02,
-	CTRL_MODE_PROGRAM = 0x02,
+	CTRL_MODE_NO = 0x02,
+	CTRL_MODE_PROGRAM = 0x03,
 }CtrlMode;
 
 /*
@@ -161,5 +164,9 @@ extern ChassisCurrent chassisCurrentTarget;
 extern GimbalsPosition gimbalsPosition;
 extern GimbalsSpeed gimbalsSpeed;
 extern GimbalsCurrent gimbalsCurrent;
+
+extern uint32_t MOVE_FLAG;
+
+
 
 #endif
