@@ -28,5 +28,6 @@ void SDBUS_Reset(SDBUS* psdbus);
 
 void SPID_Dec(SPID* spid,const unsigned char* spbuf);
 void SPID_POS_Dec(SPID* spid,const unsigned char* spbuf);
+void SPID_POS_MAX_Dec(SPID* spid,const unsigned char* sdbuf);
 
 #endif

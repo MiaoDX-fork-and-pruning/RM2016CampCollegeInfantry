@@ -56,11 +56,12 @@ typedef enum
 
 typedef enum
 {
-	INPUT_MODE_RC = 0x03,
+	INPUT_MODE_RC = 0x00,
 	INPUT_MODE_HC = 0x01,
 	INPUT_MODE_NO = 0x02,
 	
 	INPUT_MODE_PROGRAM = 0x03,
+	INPUT_MODE_PROGRAM_WITH_SPEED = 0x04,
 }InputMode;
 
 typedef enum
@@ -70,6 +71,7 @@ typedef enum
 	//CTRL_MODE_CURRENT = 0x02,
 	CTRL_MODE_NO = 0x02,
 	CTRL_MODE_PROGRAM = 0x03,
+	CTRL_MODE_PROGRAM_WITH_SPEED = 0x04,
 }CtrlMode;
 
 /*

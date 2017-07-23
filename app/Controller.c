@@ -17,7 +17,7 @@
 #include "main.h"
 #include "InputScaner.h"
 
-#define USE_Mecanum_Synthesis 0
+#define USE_Mecanum_Synthesis 0 // pros and cons
 #define ControllerDEBUG	1
 #define ControllerDEBUGNUM 4200
 uint32_t ms_tick = 0;
@@ -117,8 +117,10 @@ void WorkingStateSM(void)
 	}
 }
 
-void ChassisPositionControl(void)
+void ChassisPositionControl(int with_speed)
 {
+	
+	Mecanum_Reset(&mecanumPosition);
 	/* Mecanum Position Synthesis */
 
 	/*
@@ -140,10 +142,9 @@ void ChassisPositionControl(void)
 	mecanumPosition.w4 = CM4Encoder.angle/5.0;
 	
 	
-	
-	
+if(with_speed == 0){
 #if USE_Mecanum_Synthesis
-	
+		
 	Mecanum_Synthesis(&mecanumPosition);
 	
 	chassisPositionXPid.ref = chassisPositionTarget.x;
@@ -158,6 +159,8 @@ void ChassisPositionControl(void)
 	chassisPositionYPid.Calc(&chassisPositionYPid);
 	chassisPositionZPid.Calc(&chassisPositionZPid);
 	
+	
+	Mecanum_Reset(&chassisSpeedTarget);		
 	chassisSpeedTarget.x = chassisPositionXPid.output;
 	chassisSpeedTarget.y = chassisPositionYPid.output;
 	chassisSpeedTarget.z = chassisPositionZPid.output;
@@ -185,6 +188,9 @@ void ChassisPositionControl(void)
 	chassisSpeedTarget.w4 = chassisPositionPid4.output;
 	
 #endif
+}	
+	
+
 
 
 #if ControllerDEBUG	
@@ -222,7 +228,11 @@ void ChassisPositionControl(void)
 		
 		printf("CM3PID:\n");
 		printf("P:%f,\tI:%f,\tD:%f,\tOUT:%f\n", chassisPositionPid3.componentKp,chassisPositionPid3.componentKi, chassisPositionPid3.componentKd, chassisPositionPid3.output);
+		printf("CM4PID:\n");
+		printf("P:%f,\tI:%f,\tD:%f,\tOUT:%f\n", chassisPositionPid4.componentKp,chassisPositionPid4.componentKi, chassisPositionPid4.componentKd, chassisPositionPid4.output);
 		
+		printf("chassisPositionYPid:\n");		
+		printf("P:%f,\tI:%f,\tD:%f,\tOUT:%f\n", chassisPositionYPid.componentKp,chassisPositionYPid.componentKi, chassisPositionYPid.componentKd, chassisPositionYPid.output);
 		
 	}
 #endif	
@@ -232,6 +242,8 @@ void ChassisPositionControl(void)
 
 void ChassisSpeedControl(void)
 {
+	Mecanum_Reset(&mecanumSpeed);
+	
 	/* Mecanum Speed Synthesis */
 	mecanumSpeed.w1 = CM1Encoder.rad_rate;
 	mecanumSpeed.w2 = CM2Encoder.rad_rate;
@@ -253,6 +265,8 @@ void ChassisSpeedControl(void)
 	chassisSpeedXPid.Calc(&chassisSpeedXPid);
 	chassisSpeedYPid.Calc(&chassisSpeedYPid);
 	chassisSpeedZPid.Calc(&chassisSpeedZPid);
+	
+	Mecanum_Reset(&mecanumCurrent);
 	
 	mecanumCurrent.x = chassisSpeedXPid.output;
 	mecanumCurrent.y = chassisSpeedYPid.output;
@@ -294,22 +308,11 @@ void ChassisSpeedControl(void)
 */
 	if(debug_tick%ControllerDEBUGNUM == 0){
 		
-		/*
-		#if USE_Mecanum_Synthesis // NOTE the dec or syn
-			Mecanum_Decompose(&mecanumCurrent);
-		#else
-			Mecanum_Synthesis(&mecanumCurrent);
-		#endif
-		*/		
 		
-		/*
 		printf("chassisSpeedTarget:\n");
 		Mecanum_Debug(&chassisSpeedTarget);
 		printf("mecanumSpeed:\n");
 		Mecanum_Debug(&mecanumSpeed);
-		printf("mecanumCurrent:\n");
-		Mecanum_Debug(&mecanumCurrent);
-		*/
 		
 		/*
 		printf("CM1Encoder:\n");
@@ -339,22 +342,29 @@ void ChassisCurrentControl(void)
 	Mecanum_Decompose(&mecanumCurrent);
 #endif
 	
-	/*
+	
 	chassisRamp.Calc(&chassisRamp);
 	
 	chassisMotorCurrent.m1 = mecanumCurrent.w1 * chassisRamp.output;
 	chassisMotorCurrent.m2 = mecanumCurrent.w2 * chassisRamp.output;
 	chassisMotorCurrent.m3 = mecanumCurrent.w3 * chassisRamp.output;
 	chassisMotorCurrent.m4 = mecanumCurrent.w4 * chassisRamp.output;
-	*/
 	
+	/*	
 	chassisMotorCurrent.m1 = mecanumCurrent.w1;
 	chassisMotorCurrent.m2 = mecanumCurrent.w2;
 	chassisMotorCurrent.m3 = mecanumCurrent.w3;
 	chassisMotorCurrent.m4 = mecanumCurrent.w4;
+	*/
 	
+	if(debug_tick%ControllerDEBUGNUM == 0){
+		printf("mecanumCurrent:\n");
+		Mecanum_Debug(&mecanumCurrent);
+		printf("CCX:%d\n", chassisMotorCurrent.m3);
+	}
+
+
 	
-	//printf("CCX:%d", chassisMotorCurrent.m1);
 }
 
 void GimbalsPositionControl(void)
@@ -495,6 +505,7 @@ void ControlTask(void)
 #if ControllerDEBUG		
 		if(ms_tick % 4200 == 0)
 		{
+			printf("inputMode:%d\n", inputMode);
 			printf("ctrlMode:%d\n", ctrlMode);
 		}
 #endif		
@@ -506,7 +517,7 @@ void ControlTask(void)
 			{
 				if(ms_tick % 4 == 0)
 				{
-					ChassisPositionControl();
+					ChassisPositionControl(0);
 					ChassisSpeedControl();
 					ChassisCurrentControl();
 					GimbalsPositionControl();
@@ -532,7 +543,7 @@ void ControlTask(void)
 			{
 				if(ms_tick % 4 == 0 && MOVE_FLAG == 1)
 				{
-					ChassisPositionControl();
+					ChassisPositionControl(0);
 					ChassisSpeedControl();
 					ChassisCurrentControl();
 					//GimbalsPositionControl();
@@ -543,7 +554,22 @@ void ControlTask(void)
 				}
 				else{
 					SetCMCurrent(CAN1, 0, 0, 0, 0);
-					ChassisPositionControl(); // Just to look at present values
+					ChassisPositionControl(0); // Just to look at present values
+					ChassisSpeedControl();
+				}
+			}break;
+			case CTRL_MODE_PROGRAM_WITH_SPEED: // Set position by program with speed
+			{
+				if(ms_tick % 4 == 0 && MOVE_FLAG == 1)
+				{
+					ChassisPositionControl(1);
+					ChassisSpeedControl();
+					ChassisCurrentControl();
+					ChassisMotorCurrentTransmit();
+				}
+				else{
+					SetCMCurrent(CAN1, 0, 0, 0, 0);					
+					ChassisPositionControl(1);
 					ChassisSpeedControl();
 				}
 			}break;

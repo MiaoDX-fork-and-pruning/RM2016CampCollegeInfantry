@@ -96,5 +96,6 @@ void HC_DEC(HC* hc, uint8_t* buf);
 
 void DBUS_ENC(DBUS* dbus, uint8_t* buf);
 void DBUS_DEC(DBUS* dbus, uint8_t* buf);
+void DBUS_Reset(DBUS* pdbus);
 
 #endif

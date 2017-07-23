@@ -50,3 +50,10 @@ void PID_Set(struct PID *pid, float p, float i, float d)
 	pid->ki = i;
 	pid->kd = d;
 }
+
+void PID_Set_Max(struct PID *pid, float pmax, float imax, float dmax)
+{
+	pid->componentKpMax = pmax;
+	pid->componentKiMax = imax;
+	pid->componentKdMax = dmax;
+}

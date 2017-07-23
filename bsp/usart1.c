@@ -114,6 +114,7 @@ void USART1_IRQHandler(void)
 		if(this_time_rx_len == RC_FRAME_LEN)
 		{
 			//printf("*");
+			//DBUS_Reset(&dbus);
 			DBUS_DEC(&dbus, dbuf);
 			//InputTask(); // MOVE it to Controller.c since we want to make the program run without a RC
 		}

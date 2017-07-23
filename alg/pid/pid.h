@@ -50,6 +50,7 @@ typedef struct PID
 void PID_Reset(PID *pid);
 void PID_Calc(PID *pid);
 void PID_Set(PID *pid, float p, float i, float d);
+void PID_Set_Max(struct PID *pid, float pmax, float imax, float dmax);
 
 #define PID_CREATE(KP,KI,KD,PM,IM,DM,OM) \
 {\

@@ -49,10 +49,10 @@ MAFilterF32* mafilter_z_m = NULL;
 Ramp chassisRampPOS = CHASSIS_RAMP_LONGER;
 #define InputScannerDEBUG 0
 
-#define PROGRAM_MODE 1 // shoule be consistent with mecanum.h
+#define PROGRAM_MODE 0
 #define MOVE_RESET 1 // reset before move, relative move without memory
 
-
+#define PROGRAM_WITH_SPEED_MODE 1
 
 void GetInputMode(void)
 {
@@ -81,6 +81,9 @@ if(inputMode == INPUT_MODE_NO){
 #if PROGRAM_MODE
 inputMode = INPUT_MODE_PROGRAM;
 #endif	
+#if PROGRAM_WITH_SPEED_MODE
+inputMode = INPUT_MODE_PROGRAM_WITH_SPEED;
+#endif	
 }	
 
 	
@@ -101,7 +104,7 @@ void GetCtrlMode(void)
 		}break;
 		case SW_DN:
 		{
-			ctrlMode = CTRL_MODE_PROGRAM;//CTRL_MODE_CURRENT;
+			ctrlMode = CTRL_MODE_NO;//CTRL_MODE_CURRENT;
 		}break;
 		default:
 		{
@@ -113,6 +116,9 @@ if(ctrlMode == CTRL_MODE_NO){
 #if PROGRAM_MODE
 ctrlMode = CTRL_MODE_PROGRAM;
 #endif		
+#if PROGRAM_WITH_SPEED_MODE
+ctrlMode = CTRL_MODE_PROGRAM_WITH_SPEED;
+#endif	
 }	
 	
 }
@@ -221,25 +227,72 @@ void RAMP_CALC_Mecanum(Mecanum* mecanumVar)
 
 int SIMLIAR(float x, float y)
 {
-	return abs(x-y) < 5.0; // this can vary according to our precision
+	return abs(x-y) < 8.0; // this can vary according to our precision
 }
 
 static uint32_t mg_tick = 0;
+static uint32_t similar_mg_tick[4] = {0,0,0,0};
 uint32_t MOVE_FLAG = 0;
 void MoveGuard()
 {
-	//if(SIMLIAR(chassisPositionTarget.w1, mecanumPosition.w1) && SIMLIAR(chassisPositionTarget.w2, mecanumPosition.w2) && SIMLIAR(chassisPositionTarget.w3, mecanumPosition.w3) && SIMLIAR(chassisPositionTarget.w4, mecanumPosition.w4)){
-	if(SIMLIAR(chassisPositionTarget.w3, mecanumPosition.w3) && SIMLIAR(chassisPositionTarget.w4, mecanumPosition.w4)){
-		mg_tick ++;
-		if(mg_tick%1000 == 0){
-			printf("SIMLIAR %d times!!\n", mg_tick);
+	mg_tick++;
+	
+#if PROGRAM_WITH_SPEED_MODE
+	if(SIMLIAR(chassisPositionTarget.w1, mecanumPosition.w1)) similar_mg_tick[0] ++; else similar_mg_tick[0] = 0;
+	if(SIMLIAR(chassisPositionTarget.w2, mecanumPosition.w2)) similar_mg_tick[1] ++; else similar_mg_tick[1] = 0;
+	if(SIMLIAR(chassisPositionTarget.w3, mecanumPosition.w3)) similar_mg_tick[2] ++; else similar_mg_tick[2] = 0;
+	if(SIMLIAR(chassisPositionTarget.w4, mecanumPosition.w4)) similar_mg_tick[3] ++; else similar_mg_tick[3] = 0;
+	
+	int i = 0;
+	/*
+	for(i = 0; i < 4; i++){	
+		if(similar_mg_tick[i] > 0 && similar_mg_tick[i] < 42 && similar_mg_tick[i] %10 == 0){
+				printf("SIMLIAR of %d motor at %d times!!\n", i+1, similar_mg_tick[i]);
+		}
+	}*/
+	
+	
+	for(i = 0; i < 4; i++){	
+		if(similar_mg_tick[i] == 42){
+			printf("Going to stop motor %d!\n", i + 1);
+			if(i == 0) chassisSpeedTarget.w1 = 0;
+			if(i == 1) chassisSpeedTarget.w2 = 0;
+			if(i == 2) chassisSpeedTarget.w3 = 0;
+			if(i == 3) chassisSpeedTarget.w4 = 0;
 		}
 	}
+	
+	//if(fabs(chassisSpeedTarget.w1) < 1e-8 && fabs(chassisSpeedTarget.w2) < 1e-8 && fabs(chassisSpeedTarget.w3) < 1e-8 && fabs(chassisSpeedTarget.w4) < 1e-8)
+	if(fabs(chassisSpeedTarget.w3) < 1e-8 && fabs(chassisSpeedTarget.w4) < 1e-8)
+	{
+		printf("Going to stop!\n");
+		printf("chassisPositionTarget:\n");
+		Mecanum_Debug(&chassisPositionTarget);
+		
+		printf("mecanumPosition:\n");
+		Mecanum_Debug(&mecanumPosition);
+		MOVE_FLAG = 0;				
+		#if MOVE_RESET
+				Controller_Reset();
+				printf("Controller_Reset done!\n");
+		#endif
+	}
+		
+			
+	
+#else // PROGRAM_WITH_SPEED_MODE
+	
+	if(SIMLIAR(chassisPositionTarget.w1, mecanumPosition.w1) && SIMLIAR(chassisPositionTarget.w2, mecanumPosition.w2) && SIMLIAR(chassisPositionTarget.w3, mecanumPosition.w3) && SIMLIAR(chassisPositionTarget.w4, mecanumPosition.w4)){	
+		similar_mg_tick[0] ++;		
+	}
 	else{
-		mg_tick = 0;
+		similar_mg_tick[0] = 0;
+	}
+	if(similar_mg_tick[0] > 0 && similar_mg_tick[0] %10 == 0){
+			printf("SIMLIAR %d times!!\n", similar_mg_tick[0]);
 	}
 	
-	if(mg_tick >= 4200){
+	if(similar_mg_tick[0] >= 4200){
 		
 		printf("Going to stop!\n");
 		printf("chassisPositionTarget:\n");
@@ -257,6 +310,48 @@ void MoveGuard()
 #endif
 
 	}
+	
+#endif	// PROGRAM_WITH_SPEED_MODE
+	
+	
+	
+}
+
+int symbol(float x)
+{
+	return x > 1e-8? 1: (x < -1e-8? -1 :0);
+}
+
+
+void GetStickCtrlChassisPositionProgramWithSpeedSetSpeed(void)
+{
+	printf("Enter GetStickCtrlChassisPositionProgramWithSpeedSetSpeed\n");	
+	
+	int move_able_num = 0;	
+	
+	if(fabs(sdbus.xf) > 1e-8){
+		move_able_num ++;
+		chassisSpeedTarget.x = MAP(symbol(sdbus.xf)*0.8, -INPUT_CHASSIS_SPEED_MAX, INPUT_CHASSIS_SPEED_MAX, -INPUT_CHASSIS_SPEED_MAX, INPUT_CHASSIS_SPEED_MAX);
+	}
+	if(fabs(sdbus.xtr) > 1e-8){
+		move_able_num ++;
+		chassisSpeedTarget.y = MAP(symbol(sdbus.xtr)*0.8, -INPUT_CHASSIS_SPEED_MAX, INPUT_CHASSIS_SPEED_MAX, -INPUT_CHASSIS_SPEED_MAX, INPUT_CHASSIS_SPEED_MAX);
+	}
+	if(fabs(sdbus.xrr) > 1e-8){
+		move_able_num ++;
+		chassisSpeedTarget.z = MAP(symbol(sdbus.xrr)*0.8, -INPUT_CHASSIS_SPEED_MAX, INPUT_CHASSIS_SPEED_MAX, -INPUT_CHASSIS_SPEED_MAX, INPUT_CHASSIS_SPEED_MAX);
+	}	
+	
+	
+	if(move_able_num > 1){		
+		printf("More than one possible move direction, please do not do this!");
+		Mecanum_Reset(&chassisSpeedTarget);
+	}
+
+	printf("We got predefined chassisSpeedTarget:\n");		
+	Mecanum_Decompose(&chassisSpeedTarget); // Decompose to four wheels		
+	Mecanum_Debug(&chassisSpeedTarget);
+	
 }
 
 
@@ -269,6 +364,10 @@ void GetStickCtrlChassisPositionProgram(void)
 		Controller_Reset();
 		printf("Controller_Reset done!\n");
 #endif
+
+#if PROGRAM_WITH_SPEED_MODE
+	GetStickCtrlChassisPositionProgramWithSpeedSetSpeed();
+#endif	
 		
 		chassisPositionTarget.x = MAP(sdbus.xf, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX);
 		chassisPositionTarget.y = MAP(sdbus.xtr, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX);		
@@ -297,16 +396,28 @@ void GetStickCtrlChassisPositionProgram(void)
 		
 	}
 	
-	
-	
-	
-	
+
 	if(MOVE_FLAG){
 		MoveGuard();
-	}
-	
-	
+	}	
 }
+
+
+
+
+
+void GetStickCtrlChassisPositionProgramWithSpeed(void)
+{	
+	
+
+
+	
+	
+	
+	
+	GetStickCtrlChassisPositionProgram();
+	
+}	
 
 
 
@@ -489,6 +600,10 @@ void InputTask(void)
 			{
 				GetStickCtrlChassisPositionProgram();
 			}break;
+			case CTRL_MODE_PROGRAM_WITH_SPEED:
+			{
+				GetStickCtrlChassisPositionProgramWithSpeed();
+			}break;
 			/*
 			case CTRL_MODE_CURRENT:
 			{
@@ -532,6 +647,9 @@ void InputTask(void)
 	}
 	else if(inputMode == INPUT_MODE_PROGRAM){ // NO RC
 		GetStickCtrlChassisPositionProgram();
+	}
+	else if(inputMode == INPUT_MODE_PROGRAM_WITH_SPEED){ // NO RC and with speed mode
+		GetStickCtrlChassisPositionProgramWithSpeed();
 	}
 	
 	

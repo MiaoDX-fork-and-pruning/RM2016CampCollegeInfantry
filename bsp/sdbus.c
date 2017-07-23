@@ -108,6 +108,40 @@ void SPID_POS_Dec(SPID* spid,const unsigned char* sdbuf)
 }
 
 
+void SPID_POS_MAX_Dec(SPID* spid,const unsigned char* sdbuf)
+{
+			// +010+010+010
+	
+			//+040+020+040
+	
+			//+000+470+000
+	
+	spid->kp = (float)( (','-sdbuf[0])*((sdbuf[1]-'0')*100+(sdbuf[2]-'0')*10+(sdbuf[3]-'0')));
+	spid->ki = (float)( (','-sdbuf[4])*((sdbuf[5]-'0')*100+(sdbuf[6]-'0')*10+(sdbuf[7]-'0')));
+	spid->kd = (float)( (','-sdbuf[8])*((sdbuf[9]-'0')*100+(sdbuf[10]-'0')*10+(sdbuf[11]-'0')));
+		
+	printf("Going to set pids of position:\n");
+	
+	printf("%f,%f,%f", spid->kp, spid->ki, spid->kd);
+	
+	PID_Set_Max(&chassisPositionPid1, spid->kp, spid->ki, spid->kd);
+	PID_Set_Max(&chassisPositionPid2, spid->kp, spid->ki, spid->kd);
+	PID_Set_Max(&chassisPositionPid3, spid->kp, spid->ki, spid->kd);
+	PID_Set_Max(&chassisPositionPid4, spid->kp, spid->ki, spid->kd);
+	
+	
+	printf("Set pids max of position done:\n");
+	
+	PID_ResetAll();
+	
+	printf("PID_ResetAll done:\n");
+	
+	printf("chassisPositionPid1 PID max:%f,%f,%f\n", chassisPositionPid1.componentKpMax, chassisPositionPid1.componentKiMax, chassisPositionPid1.componentKdMax);
+	
+}
+
+
+
 void SDBUS_Reset(SDBUS* psdbus)
 {
 	memset(psdbus, 0, sizeof(SDBUS));

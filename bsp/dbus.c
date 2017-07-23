@@ -15,6 +15,7 @@
  */
  
 #include "dbus.h"
+#include "main.h"
 
 /***************************RC*******************************/
 void RC_ENC(RC* rc, uint8_t* buf)
@@ -78,3 +79,7 @@ void DBUS_DEC(DBUS* dbus, uint8_t* buf)
 	HC_DEC(&dbus->hc, buf+6);
 }
 
+void DBUS_Reset(DBUS* pdbus)
+{
+	memset(pdbus, 0, sizeof(DBUS));
+}
