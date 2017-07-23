@@ -19,7 +19,7 @@
 
 #define USE_Mecanum_Synthesis 0 // pros and cons
 #define ControllerDEBUG	1
-#define ControllerDEBUGNUM 4200
+#define ControllerDEBUGNUM 42000
 uint32_t ms_tick = 0;
 uint32_t debug_tick = 0;
 /*

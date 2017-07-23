@@ -108,6 +108,10 @@ void DMA1_Stream1_IRQHandler(void)
 				{
 					SDBUS_Dec(&sdbus,USART_RX_BUF);	
 				}break;
+				default: // chances are that, the RC is not opend at all
+				{
+					SDBUS_Dec(&sdbus,USART_RX_BUF);	
+				}break;
 			}
 			
 				//SDBUS_Dec(&sdbus,USART_RX_BUF);	

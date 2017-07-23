@@ -35,22 +35,13 @@ void SDBUS_Dec(SDBUS* sdbus,const unsigned char* sdbuf)//sdbus½âÂë
 	
 		printf("GOT:%f,%f,%f\n", sdbus->xf, sdbus->xtr, sdbus->xrr);
 	
-		sdbus->xf *= 27;
-		sdbus->xtr *= 27;
-		sdbus->xrr *= 27;
-	
-	
-	
-	
-	
+
 		/*
 		sdbus->w1 = RM3510_1.thisPosition+sdbus->xf+sdbus->xtr+sdbus->xrr;
 		sdbus->w2 = -RM3510_2.thisPosition+sdbus->xf-sdbus->xtr-sdbus->xrr;
 		sdbus->w3 = RM3510_3.thisPosition+sdbus->xf-sdbus->xtr+sdbus->xrr;
 		sdbus->w4 = -RM3510_4.thisPosition+sdbus->xf+sdbus->xtr-sdbus->xrr;
 		*/
-		
-		printf("CAL:%f,%f,%f\n", sdbus->xf, sdbus->xtr, sdbus->xrr);
 }
 
 void SPID_Dec(SPID* spid,const unsigned char* sdbuf)

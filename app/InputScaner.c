@@ -235,14 +235,30 @@ void RAMP_CALC_Mecanum(Mecanum* mecanumVar)
 }
 
 
+int symbol(float x)
+{
+	return x > 1e-8? 1: (x < -1e-8? -1 :0);
+}
 
-int SIMLIAR(float x, float y)
+
+int SIMLIAR(const float x, const float y)
 {
 	return abs(x-y) < 8.0; // this can vary according to our precision
 }
 
+
+int MISSED(const float target, const float x)
+{
+	if((symbol(target) == 1 && x - target > 5.0) || (symbol(target) == -1 && x - target < -5.0)){
+		return 1;
+	}
+
+	return 0;
+}
+
 static uint32_t mg_tick = 0;
 static uint32_t similar_mg_tick[4] = {0,0,0,0};
+static uint32_t possible_wrong_tick[4] = {0,0,0,0};
 uint32_t MOVE_FLAG = 0;
 void MoveGuard()
 {
@@ -253,6 +269,14 @@ void MoveGuard()
 	if(SIMLIAR(chassisPositionTarget.w2, mecanumPosition.w2)) similar_mg_tick[1] ++; else similar_mg_tick[1] = 0;
 	if(SIMLIAR(chassisPositionTarget.w3, mecanumPosition.w3)) similar_mg_tick[2] ++; else similar_mg_tick[2] = 0;
 	if(SIMLIAR(chassisPositionTarget.w4, mecanumPosition.w4)) similar_mg_tick[3] ++; else similar_mg_tick[3] = 0;
+	
+	if(mg_tick % 10 == 0){
+		if(MISSED(chassisPositionTarget.w1, mecanumPosition.w1)) possible_wrong_tick[0] ++; else possible_wrong_tick[0] = 0;
+		if(MISSED(chassisPositionTarget.w2, mecanumPosition.w2)) possible_wrong_tick[1] ++; else possible_wrong_tick[1] = 0;
+		if(MISSED(chassisPositionTarget.w3, mecanumPosition.w3)) possible_wrong_tick[2] ++; else possible_wrong_tick[2] = 0;
+		if(MISSED(chassisPositionTarget.w4, mecanumPosition.w4)) possible_wrong_tick[3] ++; else possible_wrong_tick[3] = 0;
+	}
+	
 	
 	int i = 0;
 	/*
@@ -265,12 +289,21 @@ void MoveGuard()
 	
 	for(i = 0; i < 4; i++){	
 		if(similar_mg_tick[i] == 42){
-			printf("Going to stop motor %d!\n", i + 1);
+			printf("Going to stop motor %d since we got there!\n", i + 1);
 			if(i == 0) chassisSpeedTarget.w1 = 0;
 			if(i == 1) chassisSpeedTarget.w2 = 0;
 			if(i == 2) chassisSpeedTarget.w3 = 0;
 			if(i == 3) chassisSpeedTarget.w4 = 0;
 		}
+		
+		if(possible_wrong_tick[i] == 3){
+			//printf("Going to stop motor %d since chances are that we missed out!\n", i + 1);
+			if(i == 0) chassisSpeedTarget.w1 = 0;
+			if(i == 1) chassisSpeedTarget.w2 = 0;
+			if(i == 2) chassisSpeedTarget.w3 = 0;
+			if(i == 3) chassisSpeedTarget.w4 = 0;
+		}
+		
 	}
 	
 	if(fabs(chassisSpeedTarget.w1) < 1e-8 && fabs(chassisSpeedTarget.w2) < 1e-8 && fabs(chassisSpeedTarget.w3) < 1e-8 && fabs(chassisSpeedTarget.w4) < 1e-8)
@@ -328,29 +361,37 @@ void MoveGuard()
 	
 }
 
-int symbol(float x)
-{
-	return x > 1e-8? 1: (x < -1e-8? -1 :0);
-}
 
 
 void GetStickCtrlChassisPositionProgramWithSpeedSetSpeed(void)
 {
 	printf("Enter GetStickCtrlChassisPositionProgramWithSpeedSetSpeed\n");	
 	
+		
+	if(fabs(sdbus.xf) > 4.7 || fabs(sdbus.xtr) > 4.7  || fabs(sdbus.xrr) > 4.7){ // one circle, 0.47
+		printf("Seems the distance is too much (more that 4.7 for 10 full circle), please check it!\n");
+		SDBUS_Reset(&sdbus);
+	}
+	
+	sdbus.xf *= 27;
+	sdbus.xtr *= 27;
+	sdbus.xrr *= 27;
+	printf("CAL:%f,%f,%f\n", sdbus.xf, sdbus.xtr, sdbus.xrr);
+	
+	
 	int move_able_num = 0;	
 	
 	if(fabs(sdbus.xf) > 1e-8){
 		move_able_num ++;
-		chassisSpeedTarget.x = MAP(symbol(sdbus.xf)*1.234, -INPUT_CHASSIS_SPEED_MAX, INPUT_CHASSIS_SPEED_MAX, -INPUT_CHASSIS_SPEED_MAX, INPUT_CHASSIS_SPEED_MAX);
+		chassisSpeedTarget.x = MAP(symbol(sdbus.xf)*2.345, -INPUT_CHASSIS_SPEED_MAX, INPUT_CHASSIS_SPEED_MAX, -INPUT_CHASSIS_SPEED_MAX, INPUT_CHASSIS_SPEED_MAX);
 	}
 	if(fabs(sdbus.xtr) > 1e-8){
 		move_able_num ++;
-		chassisSpeedTarget.y = MAP(symbol(sdbus.xtr)*1.234, -INPUT_CHASSIS_SPEED_MAX, INPUT_CHASSIS_SPEED_MAX, -INPUT_CHASSIS_SPEED_MAX, INPUT_CHASSIS_SPEED_MAX);
+		chassisSpeedTarget.y = MAP(symbol(sdbus.xtr)*2.345, -INPUT_CHASSIS_SPEED_MAX, INPUT_CHASSIS_SPEED_MAX, -INPUT_CHASSIS_SPEED_MAX, INPUT_CHASSIS_SPEED_MAX);
 	}
 	if(fabs(sdbus.xrr) > 1e-8){
 		move_able_num ++;
-		chassisSpeedTarget.z = MAP(symbol(sdbus.xrr)*1.234, -INPUT_CHASSIS_SPEED_MAX, INPUT_CHASSIS_SPEED_MAX, -INPUT_CHASSIS_SPEED_MAX, INPUT_CHASSIS_SPEED_MAX);
+		chassisSpeedTarget.z = MAP(symbol(sdbus.xrr)*2.345, -INPUT_CHASSIS_SPEED_MAX, INPUT_CHASSIS_SPEED_MAX, -INPUT_CHASSIS_SPEED_MAX, INPUT_CHASSIS_SPEED_MAX);
 	}	
 	
 	
