@@ -53,7 +53,7 @@ Ramp chassisRampPOS = CHASSIS_RAMP_LONGER;
 #define MOVE_RESET 1 // reset before move, relative move without memory
 
 #define PROGRAM_MODE 0
-#define PROGRAM_WITH_SPEED_MODE 0
+#define PROGRAM_WITH_SPEED_MODE 1
 #define PROGRAM_WITH_CURRENT_MODE 0 // failed, since we can not make sure what current is guaranteed to make the motor run :(
 
 void GetInputMode(void)
@@ -273,8 +273,8 @@ void MoveGuard()
 		}
 	}
 	
-	//if(fabs(chassisSpeedTarget.w1) < 1e-8 && fabs(chassisSpeedTarget.w2) < 1e-8 && fabs(chassisSpeedTarget.w3) < 1e-8 && fabs(chassisSpeedTarget.w4) < 1e-8)
-	if(fabs(chassisSpeedTarget.w3) < 1e-8 && fabs(chassisSpeedTarget.w4) < 1e-8)
+	if(fabs(chassisSpeedTarget.w1) < 1e-8 && fabs(chassisSpeedTarget.w2) < 1e-8 && fabs(chassisSpeedTarget.w3) < 1e-8 && fabs(chassisSpeedTarget.w4) < 1e-8)
+	//if(fabs(chassisSpeedTarget.w3) < 1e-8 && fabs(chassisSpeedTarget.w4) < 1e-8)
 	{
 		printf("Going to stop!\n");
 		printf("chassisPositionTarget:\n");
@@ -342,15 +342,15 @@ void GetStickCtrlChassisPositionProgramWithSpeedSetSpeed(void)
 	
 	if(fabs(sdbus.xf) > 1e-8){
 		move_able_num ++;
-		chassisSpeedTarget.x = MAP(symbol(sdbus.xf)*0.8, -INPUT_CHASSIS_SPEED_MAX, INPUT_CHASSIS_SPEED_MAX, -INPUT_CHASSIS_SPEED_MAX, INPUT_CHASSIS_SPEED_MAX);
+		chassisSpeedTarget.x = MAP(symbol(sdbus.xf)*1.234, -INPUT_CHASSIS_SPEED_MAX, INPUT_CHASSIS_SPEED_MAX, -INPUT_CHASSIS_SPEED_MAX, INPUT_CHASSIS_SPEED_MAX);
 	}
 	if(fabs(sdbus.xtr) > 1e-8){
 		move_able_num ++;
-		chassisSpeedTarget.y = MAP(symbol(sdbus.xtr)*0.8, -INPUT_CHASSIS_SPEED_MAX, INPUT_CHASSIS_SPEED_MAX, -INPUT_CHASSIS_SPEED_MAX, INPUT_CHASSIS_SPEED_MAX);
+		chassisSpeedTarget.y = MAP(symbol(sdbus.xtr)*1.234, -INPUT_CHASSIS_SPEED_MAX, INPUT_CHASSIS_SPEED_MAX, -INPUT_CHASSIS_SPEED_MAX, INPUT_CHASSIS_SPEED_MAX);
 	}
 	if(fabs(sdbus.xrr) > 1e-8){
 		move_able_num ++;
-		chassisSpeedTarget.z = MAP(symbol(sdbus.xrr)*0.8, -INPUT_CHASSIS_SPEED_MAX, INPUT_CHASSIS_SPEED_MAX, -INPUT_CHASSIS_SPEED_MAX, INPUT_CHASSIS_SPEED_MAX);
+		chassisSpeedTarget.z = MAP(symbol(sdbus.xrr)*1.234, -INPUT_CHASSIS_SPEED_MAX, INPUT_CHASSIS_SPEED_MAX, -INPUT_CHASSIS_SPEED_MAX, INPUT_CHASSIS_SPEED_MAX);
 	}	
 	
 	
@@ -362,7 +362,12 @@ void GetStickCtrlChassisPositionProgramWithSpeedSetSpeed(void)
 	printf("We got predefined chassisSpeedTarget:\n");		
 	Mecanum_Decompose(&chassisSpeedTarget); // Decompose to four wheels		
 	Mecanum_Debug(&chassisSpeedTarget);
-	
+	/*
+	PID_Set(&chassisSpeedPid1, 42, 0, 0);
+	PID_Set(&chassisSpeedPid1, 42, 0, 0);
+	PID_Set(&chassisSpeedPid1, 42, 0, 0);
+	PID_Set(&chassisSpeedPid1, 42, 0, 0);
+	*/
 }
 
 
@@ -385,6 +390,11 @@ void GetStickCtrlChassisPositionProgram(void)
 		chassisPositionTarget.z = MAP(sdbus.xrr, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX, -INPUT_CHASSIS_POSITION_MAX, INPUT_CHASSIS_POSITION_MAX);
 		//chassisPositionTarget.z = mecanumPosition.z + MAP(sdbus.xrr+CH_MID, CH_MIN, CH_MAX, -INPUT_GIMBALS_POSITION_MAX, INPUT_GIMBALS_POSITION_MAX)*81.92;
 		
+		/*
+		printf("Strange:\n");
+		printf("chassisPositionTarget.y:%f\n", chassisPositionTarget.y);
+		printf("sdbus.xtr:%f\n", sdbus.xtr);
+		*/
 		
 		chassisPositionTarget.x *= (180.0/PI/5.0);
 		chassisPositionTarget.y *= (180.0/PI/5.0);

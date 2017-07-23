@@ -33,7 +33,7 @@ void SDBUS_Dec(SDBUS* sdbus,const unsigned char* sdbuf)//sdbus½âÂë
 		sdbus->xrr = (double)( (','-sdbuf[8])*((sdbuf[9]-'0')*100+(sdbuf[10]-'0')*10+(sdbuf[11]-'0'))*0.01 );
 		
 	
-	printf("GOT:%f,%f,%f\n", sdbus->xf, sdbus->xtr, sdbus->xrr);
+		printf("GOT:%f,%f,%f\n", sdbus->xf, sdbus->xtr, sdbus->xrr);
 	
 		sdbus->xf *= 27;
 		sdbus->xtr *= 27;
@@ -55,7 +55,7 @@ void SDBUS_Dec(SDBUS* sdbus,const unsigned char* sdbuf)//sdbus½âÂë
 
 void SPID_Dec(SPID* spid,const unsigned char* sdbuf)
 {
-	spid->kp = (float)( (','-sdbuf[0])*((sdbuf[1]-'0')*100+(sdbuf[2]-'0')*10+(sdbuf[3]-'0')) );
+	spid->kp = (float)( (','-sdbuf[0])*((sdbuf[1]-'0')*100+(sdbuf[2]-'0')*10+(sdbuf[3]-'0'))*1 );
 	spid->ki = (float)( (','-sdbuf[4])*((sdbuf[5]-'0')*100+(sdbuf[6]-'0')*10+(sdbuf[7]-'0'))*0.1 );
 	spid->kd = (float)( (','-sdbuf[8])*((sdbuf[9]-'0')*100+(sdbuf[10]-'0')*10+(sdbuf[11]-'0'))*0.1 );
 		
@@ -74,6 +74,39 @@ void SPID_Dec(SPID* spid,const unsigned char* sdbuf)
 	printf("chassisSpeedPid1 PID:%f,%f,%f", chassisSpeedPid1.kp, chassisSpeedPid1.ki, chassisSpeedPid1.kd);
 	
 }
+
+void SPID_MAX_Dec(SPID* spid,const unsigned char* sdbuf)
+{
+			// +010+010+010
+	
+			//+040+020+040
+	
+			//+000+470+000
+	
+	spid->kp = (float)( (','-sdbuf[0])*((sdbuf[1]-'0')*100+(sdbuf[2]-'0')*10+(sdbuf[3]-'0')));
+	spid->ki = (float)( (','-sdbuf[4])*((sdbuf[5]-'0')*100+(sdbuf[6]-'0')*10+(sdbuf[7]-'0')));
+	spid->kd = (float)( (','-sdbuf[8])*((sdbuf[9]-'0')*100+(sdbuf[10]-'0')*10+(sdbuf[11]-'0')));
+		
+	printf("Going to set pids of position:\n");
+	
+	printf("%f,%f,%f", spid->kp, spid->ki, spid->kd);
+	
+	PID_Set_Max(&chassisSpeedPid1, spid->kp, spid->ki, spid->kd);
+	PID_Set_Max(&chassisSpeedPid2, spid->kp, spid->ki, spid->kd);
+	PID_Set_Max(&chassisSpeedPid3, spid->kp, spid->ki, spid->kd);
+	PID_Set_Max(&chassisSpeedPid4, spid->kp, spid->ki, spid->kd);
+	
+	
+	printf("Set pids max of speed done:\n");
+	
+	PID_ResetAll();
+	
+	printf("PID_ResetAll done:\n");
+	
+	printf("chassisSpeedPid1 PID max:%f,%f,%f\n", chassisSpeedPid1.componentKpMax, chassisSpeedPid1.componentKiMax, chassisSpeedPid1.componentKdMax);
+	
+}
+
 
 void SPID_POS_Dec(SPID* spid,const unsigned char* sdbuf)
 {
@@ -139,6 +172,7 @@ void SPID_POS_MAX_Dec(SPID* spid,const unsigned char* sdbuf)
 	printf("chassisPositionPid1 PID max:%f,%f,%f\n", chassisPositionPid1.componentKpMax, chassisPositionPid1.componentKiMax, chassisPositionPid1.componentKdMax);
 	
 }
+
 
 
 

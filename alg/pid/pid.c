@@ -56,4 +56,5 @@ void PID_Set_Max(struct PID *pid, float pmax, float imax, float dmax)
 	pid->componentKpMax = pmax;
 	pid->componentKiMax = imax;
 	pid->componentKdMax = dmax;
+	pid->outputMax = pmax + imax + dmax; // it is a ugly trick
 }

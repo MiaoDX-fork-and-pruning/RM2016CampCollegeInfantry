@@ -324,6 +324,13 @@ void ChassisSpeedControl(void)
 		printf("CM4Encoder:\n");
 		Encoder_Debug(&CM4Encoder);
 		*/
+
+		printf("CM3PID speed:\n");
+		printf("P:%f,\tI:%f,\tD:%f,\tOUT:%f\n", chassisSpeedPid3.componentKp,chassisSpeedPid3.componentKi, chassisSpeedPid3.componentKd, chassisSpeedPid3.output);
+		printf("CM4PID speed:\n");
+		printf("P:%f,\tI:%f,\tD:%f,\tOUT:%f\n", chassisSpeedPid4.componentKp,chassisSpeedPid4.componentKi, chassisSpeedPid4.componentKd, chassisSpeedPid4.output);
+		
+
 		printf("CM3Encoder:\n");
 		Encoder_Debug(&CM3Encoder);
 
@@ -357,11 +364,13 @@ void ChassisCurrentControl(void)
 	chassisMotorCurrent.m4 = mecanumCurrent.w4;
 	*/
 	
+	
 	if(debug_tick%ControllerDEBUGNUM == 0){
-		printf("mecanumCurrent:\n");
-		Mecanum_Debug(&mecanumCurrent);
+	//	printf("mecanumCurrent:\n");
+		//Mecanum_Debug(&mecanumCurrent);
 		printf("CCX:%d\n", chassisMotorCurrent.m3);
 	}
+	
 
 
 	

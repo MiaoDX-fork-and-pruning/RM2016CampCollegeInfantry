@@ -96,11 +96,13 @@ void DMA1_Stream1_IRQHandler(void)
 			switch(dbus.rc.s1){
 				case SW_UP:
 				{
-					SPID_POS_MAX_Dec(&spid, USART_RX_BUF);
+					//SPID_POS_MAX_Dec(&spid, USART_RX_BUF);
+					SPID_MAX_Dec(&spid, USART_RX_BUF);
 				}break;
 				case SW_MD:
 				{
-					SPID_POS_Dec(&spid, USART_RX_BUF);
+					//SPID_POS_Dec(&spid, USART_RX_BUF);
+					SPID_Dec(&spid, USART_RX_BUF);
 				}break;
 				case SW_DN:
 				{
