@@ -30,7 +30,7 @@ Keyboard keyboard;
 Mecanum chassisPositionTarget;
 Mecanum chassisSpeedTarget;
 
-ChassisCurrent chassisCurrentTarget;
+
 
 
 GimbalsPosition gimbalsPosition;
@@ -49,10 +49,12 @@ MAFilterF32* mafilter_z_m = NULL;
 Ramp chassisRampPOS = CHASSIS_RAMP_LONGER;
 #define InputScannerDEBUG 0
 
-#define PROGRAM_MODE 0
+
 #define MOVE_RESET 1 // reset before move, relative move without memory
 
-#define PROGRAM_WITH_SPEED_MODE 1
+#define PROGRAM_MODE 0
+#define PROGRAM_WITH_SPEED_MODE 0
+#define PROGRAM_WITH_CURRENT_MODE 0 // failed, since we can not make sure what current is guaranteed to make the motor run :(
 
 void GetInputMode(void)
 {
@@ -84,6 +86,11 @@ inputMode = INPUT_MODE_PROGRAM;
 #if PROGRAM_WITH_SPEED_MODE
 inputMode = INPUT_MODE_PROGRAM_WITH_SPEED;
 #endif	
+#if PROGRAM_WITH_CURRENT_MODE
+inputMode = INPUT_MODE_PROGRAM_WITH_CURRENT;
+#endif	
+	
+	
 }	
 
 	
@@ -119,7 +126,11 @@ ctrlMode = CTRL_MODE_PROGRAM;
 #if PROGRAM_WITH_SPEED_MODE
 ctrlMode = CTRL_MODE_PROGRAM_WITH_SPEED;
 #endif	
+#if PROGRAM_WITH_CURRENT_MODE
+ctrlMode = CTRL_MODE_PROGRAM_WITH_CURRENT;
+#endif
 }	
+
 	
 }
 
@@ -450,9 +461,12 @@ void GetStickCtrlChassisSpeed(void)
 
 void GetStickCtrlChassisCurrent(void)
 {
-	chassisCurrentTarget.x = MAP(dbus.rc.ch0, CH_MIN, CH_MAX, -INPUT_CHASSIS_CURRENT_MAX, INPUT_CHASSIS_CURRENT_MAX);
-	chassisCurrentTarget.y = MAP(dbus.rc.ch1, CH_MIN, CH_MAX, -INPUT_CHASSIS_CURRENT_MAX, INPUT_CHASSIS_CURRENT_MAX);
-	chassisCurrentTarget.z = MAP(dbus.rc.ch2, CH_MIN, CH_MAX, -INPUT_GIMBALS_CURRENT_MAX, INPUT_GIMBALS_CURRENT_MAX);
+	//printf(".");
+	mecanumCurrent.x = MAP(dbus.rc.ch0, CH_MIN, CH_MAX, -INPUT_CHASSIS_CURRENT_MAX, INPUT_CHASSIS_CURRENT_MAX);
+	mecanumCurrent.y = MAP(dbus.rc.ch1, CH_MIN, CH_MAX, -INPUT_CHASSIS_CURRENT_MAX, INPUT_CHASSIS_CURRENT_MAX);
+	mecanumCurrent.z = MAP(dbus.rc.ch2, CH_MIN, CH_MAX, -INPUT_GIMBALS_CURRENT_MAX, INPUT_GIMBALS_CURRENT_MAX);
+	
+	Mecanum_Decompose(&mecanumCurrent);
 }
 
 void GetStickCtrlGimbalsPosition(void)
@@ -496,9 +510,9 @@ void GetKeyboardCtrlChassisPosition(void)
 		MAFilterF32_Reset(mafilter_y);
 		MAFilterF32_Reset(mafilter_z);
 	}
-	chassisPositionTarget.x = MAFilterF32_Calc(mafilter_x, position_x);
-	chassisPositionTarget.y = MAFilterF32_Calc(mafilter_y, position_y);
-	chassisPositionTarget.z = MAFilterF32_Calc(mafilter_z, position_z);
+	mecanumCurrent.x = MAFilterF32_Calc(mafilter_x, position_x);
+	mecanumCurrent.y = MAFilterF32_Calc(mafilter_y, position_y);
+	mecanumCurrent.z = MAFilterF32_Calc(mafilter_z, position_z);
 }
 
 void GetKeyboardCtrlChassisSpeed(void)
@@ -552,9 +566,9 @@ void GetKeyboardCtrlChassisCurrent(void)
 		MAFilterF32_Reset(mafilter_y);
 		MAFilterF32_Reset(mafilter_z);
 	}
-	chassisCurrentTarget.x = MAFilterF32_Calc(mafilter_x, current_x);
-	chassisCurrentTarget.y = MAFilterF32_Calc(mafilter_y, current_y);
-	chassisCurrentTarget.z = MAFilterF32_Calc(mafilter_z, current_z);
+	mecanumCurrent.x = MAFilterF32_Calc(mafilter_x, current_x);
+	mecanumCurrent.y = MAFilterF32_Calc(mafilter_y, current_y);
+	mecanumCurrent.z = MAFilterF32_Calc(mafilter_z, current_z);
 }
 
 void GetMouseCtrlGimbalsPosition(void)
@@ -650,6 +664,10 @@ void InputTask(void)
 	}
 	else if(inputMode == INPUT_MODE_PROGRAM_WITH_SPEED){ // NO RC and with speed mode
 		GetStickCtrlChassisPositionProgramWithSpeed();
+	}
+	else if (inputMode == INPUT_MODE_PROGRAM_WITH_CURRENT)
+	{
+		GetStickCtrlChassisCurrent();
 	}
 	
 	

@@ -585,6 +585,15 @@ void ControlTask(void)
 				}
 			}break;
 			*/
+			case CTRL_MODE_PROGRAM_WITH_CURRENT:
+			{
+				if(ms_tick % 4  == 0)
+				{
+					ChassisCurrentControl();
+					ChassisMotorCurrentTransmit();
+				}
+			}break;			
+			
 			default:
 			{
 			}break;
